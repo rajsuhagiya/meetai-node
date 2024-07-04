@@ -164,7 +164,7 @@ router.post("/webhooks", async (req, res) => {
           }
         }
       }
-    }, 180000); // 180 seconds delay
+    }, 60); // 180 seconds delay
     // setTimeout(async () => {
     //   if (
     //     req.body.event === "done" ||
