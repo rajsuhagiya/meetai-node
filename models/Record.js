@@ -6,7 +6,7 @@ const RecordsSchema = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "user",
   },
-  botName: {
+  meetingName: {
     type: String,
     required: true,
   },
@@ -14,10 +14,18 @@ const RecordsSchema = new Schema({
     type: String,
     required: true,
   },
-  botId: {
-    type: String,
+  bot: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "settings",
   },
-
+  folder: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "folder",
+  },
+  status: {
+    type: String,
+    default: "pending",
+  },
   joinAt: {
     type: Date,
     default: Date.now,

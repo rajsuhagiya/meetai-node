@@ -13,7 +13,7 @@ router.post("/getsetting", fetchuser, async (req, res) => {
       botName: setting?.botName || "",
       _id: setting?._id || "",
     };
-    console.log(data, "???");
+    // console.log(data, "???");
     // if (!setting) {
     //   return res.status(404).json({ error: "Setting not found", response });
     // }
