@@ -47,11 +47,11 @@ const RecordsDetailsSchema = new Schema({
     default: "null",
   },
   startTime: {
-    type: Date,
+    type: String,
     default: "null",
   },
   endTime: {
-    type: Date,
+    type: String,
     default: "null",
   },
   joinAt: {
