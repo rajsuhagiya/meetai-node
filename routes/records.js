@@ -147,22 +147,38 @@ router.post("/webhooks", async (req, res) => {
                   path.basename(videoUrl)
                 );
 
-                const file = fs.createWriteStream(videoPath);
-                https
-                  .get(videoUrl, (response) => {
-                    response.pipe(file);
-                    file.on("finish", async () => {
-                      file.close();
-                      findRecord.videoUrl = videoUrl;
-                      await findRecord.save();
-                      res.download(videoPath);
-                    });
-                  })
-                  .on("error", (err) => {
-                    fs.unlink(videoPath, () => {}); // Delete the file asynchronously if an error occurs
-                    console.error("Error writing video file:", err);
-                    res.status(500).json({ error: "Error saving video file" });
-                  });
+                // Ensure the directory exists
+                fs.mkdir(
+                  path.dirname(videoPath),
+                  { recursive: true },
+                  (err) => {
+                    if (err) {
+                      console.error("Error creating directory:", err);
+                      return res
+                        .status(500)
+                        .json({ error: "Error creating directory" });
+                    }
+
+                    const file = fs.createWriteStream(videoPath);
+                    https
+                      .get(videoUrl, (response) => {
+                        response.pipe(file);
+                        file.on("finish", async () => {
+                          file.close();
+                          findRecord.videoUrl = videoUrl;
+                          await findRecord.save();
+                          res.download(videoPath);
+                        });
+                      })
+                      .on("error", (err) => {
+                        fs.unlink(videoPath, () => {}); // Delete the file asynchronously if an error occurs
+                        console.error("Error writing video file:", err);
+                        res
+                          .status(500)
+                          .json({ error: "Error saving video file" });
+                      });
+                  }
+                );
               }
             })
             .catch((err) => {
