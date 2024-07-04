@@ -103,6 +103,7 @@ router.post("/webhooks", async (req, res) => {
   try {
     console.log(req.body);
     setTimeout(async () => {
+      let bot_id = req.body.data.bot_id;
       if (
         req.body.data &&
         req.body.data.bot_id &&
@@ -117,8 +118,8 @@ router.post("/webhooks", async (req, res) => {
           await findRecord.save();
           console.log("Record updated successfully:", findRecord);
         }
-        console.log(req.body.data.bot_id, "botId");
-        const url = `https://api.recall.ai/api/v1/bot/${req.body.data.bot_id}/`;
+        console.log(bot_id, "botId");
+        const url = `https://api.recall.ai/api/v1/bot/${bot_id}/`;
         const options = {
           method: "GET",
           headers: { accept: "application/json" },
