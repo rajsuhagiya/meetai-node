@@ -112,6 +112,21 @@ router.post("/webhooks", async (req, res) => {
           await findRecord.save();
           console.log("Record updated successfully:", findRecord);
         }
+        if (
+          req.body.data.status.code === "done" ||
+          req.body.data.status.code === "call_ended"
+        ) {
+          const url = `https://api.recall.ai/api/v1/bot/${botId}/`;
+          const options = {
+            method: "GET",
+            headers: { accept: "application/json" },
+          };
+
+          fetch(url, options)
+            .then((res) => res.json())
+            .then((json) => console.log(json, "bot_get_data"))
+            .catch((err) => console.error("error:" + err));
+        }
       }
     }, 180000); // 180 seconds delay
     // setTimeout(async () => {
