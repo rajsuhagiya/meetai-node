@@ -8,6 +8,7 @@ const { body, validationResult } = require("express-validator");
 const fetch = require("node-fetch");
 const fetchuser = require("../middleware/fetchuser");
 
+const Recall = "us-west-2.recall.ai";
 const APIKEY = "f3da1c8372f7d6cb4d1b8f3c4f3ace179ad643e2";
 // const APIKEY = "29a16e9135f397c745c0aec150651378fd1e4632";
 
@@ -57,7 +58,7 @@ router.post(
         user: userId,
       });
       if (bot) {
-        const url = "https://us-west-2.recall.ai/api/v1/bot/";
+        const url = `https://${Recall}/api/v1/bot/`;
         const options = {
           method: "POST",
           headers: {
@@ -119,7 +120,7 @@ router.post("/webhooks", async (req, res) => {
           console.log("Record updated successfully:", findRecord);
         }
         console.log(bot_id, "botId");
-        const url = `https://api.recall.ai/api/v1/bot/${bot_id}/`;
+        const url = `https://${Recall}/api/v1/bot/${bot_id}/`;
         const options = {
           method: "GET",
           headers: {
