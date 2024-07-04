@@ -6,7 +6,7 @@ const RecordsDetailsSchema = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "user",
   },
-  meetingId: {
+  recordId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "record",
   },

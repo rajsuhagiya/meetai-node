@@ -100,6 +100,12 @@ router.post(
   }
 );
 
+function generateUniqueSuffix() {
+  const now = new Date();
+  const milliseconds = now.getTime(); // Get the number of milliseconds since January 1, 1970
+  return milliseconds;
+}
+
 router.post("/webhooks", async (req, res) => {
   try {
     console.log(req.body);
@@ -108,31 +114,55 @@ router.post("/webhooks", async (req, res) => {
       if (
         req.body.data &&
         req.body.data.bot_id &&
-        (req.body.data.status.code === "done" ||
+        (req.body.event === "done" ||
           req.body.data.status.code === "call_ended")
       ) {
         findRecord = await Record.findOne({
           botId: req.body.data.bot_id,
         });
         if (findRecord) {
+          const uniqueSuffix = generateUniqueSuffix();
+          const videoUrlName = `${findRecord.meetingName}-${uniqueSuffix}`;
           findRecord.status = req.body.data.status.code;
           await findRecord.save();
           console.log("Record updated successfully:", findRecord);
-        }
-        console.log(bot_id, "botId");
-        const url = `https://${Recall}/api/v1/bot/${bot_id}/`;
-        const options = {
-          method: "GET",
-          headers: {
-            accept: "application/json",
-            Authorization: APIKEY,
-          },
-        };
+          console.log(bot_id, "botId");
+          //save record in record details
+          const recordDetail = new RecordDetails({
+            recordId: findRecord._id,
+            meetingUrl: findRecord.meetingUrl,
+            user: req.user.id,
+          });
+          const savedRecordDetails = await recordDetail.save();
+          if (savedRecordDetails) {
+            const url = `https://${Recall}/api/v1/bot/${bot_id}/`;
+            const options = {
+              method: "GET",
+              headers: {
+                accept: "application/json",
+                Authorization: APIKEY,
+              },
+            };
 
-        fetch(url, options)
-          .then((res) => res.json())
-          .then((json) => console.log(json, "bot_get_data"))
-          .catch((err) => console.error("error:" + err));
+            fetch(url, options)
+              .then((res) => res.json())
+              .then(async (json) => {
+                console.log(json, "bot_get_data");
+                // const video_name =
+                if (json.video_url) {
+                  const findRecordDetails = await RecordDetails.findOne({
+                    recordId: findRecord._id,
+                  });
+                  if (findRecordDetails) {
+                    findRecordDetails.videoUrl = json.videoUrl;
+                    await findRecordDetails.save();
+                  }
+                  res.download(`./public/records/${json.video_url}`);
+                }
+              })
+              .catch((err) => console.error("error:" + err));
+          }
+        }
       }
     }, 180000); // 180 seconds delay
     // setTimeout(async () => {
