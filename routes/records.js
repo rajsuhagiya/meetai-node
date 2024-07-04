@@ -74,12 +74,13 @@ router.post(
         const result = fetch(url, options)
           .then((res) => res.json())
           .then(async (json) => {
-            console.log(json, "ffffffffff");
+            // console.log(json, "ffffffffff");
             if (json.id) {
               const record = new Record({
                 meetingName,
                 meetingUrl,
                 bot: bot._id,
+                botId: json.id, //bot-id for webhook
                 folder: folder,
                 user: req.user.id,
               });
@@ -103,7 +104,9 @@ router.post("/webhooks", async (req, res) => {
     console.log(req.body);
     setTimeout(async () => {
       if (req.body.data && req.body.data.bot_id) {
-        findRecord = Record.findById(req.body.data.bot_id);
+        findRecord = await Record.findOne({
+          botId: req.body.data.bot_id,
+        });
         if (findRecord) {
           findRecord.status = req.body.data.status.code;
           await findRecord.save();
