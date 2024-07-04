@@ -7,6 +7,9 @@ const Folder = require("../models/Folder");
 const { body, validationResult } = require("express-validator");
 const fetch = require("node-fetch");
 const fetchuser = require("../middleware/fetchuser");
+const fs = require("fs");
+const path = require("path");
+const https = require("https");
 
 const Recall = "us-west-2.recall.ai";
 const APIKEY = "f3da1c8372f7d6cb4d1b8f3c4f3ace179ad643e2";
@@ -115,7 +118,7 @@ router.post("/webhooks", async (req, res) => {
         req.body.event === "done" ||
         req.body.data.status.code === "call_ended"
       ) {
-        findRecord = await Record.findOne({
+        const findRecord = await Record.findOne({
           botId: req.body.data.bot_id,
         });
         if (findRecord) {
@@ -132,16 +135,40 @@ router.post("/webhooks", async (req, res) => {
           };
 
           fetch(url, options)
-            .then((res) => res.json())
+            .then((response) => response.json())
             .then(async (json) => {
               console.log(json, "bot_get_data");
               if (json.video_url) {
-                findRecord.videoUrl = json.video_url;
-                await findRecord.save();
-                res.download(`./public/records/${json.video_url}`);
+                const videoUrl = json.video_url;
+                const videoPath = path.join(
+                  __dirname,
+                  "public",
+                  "records",
+                  path.basename(videoUrl)
+                );
+
+                const file = fs.createWriteStream(videoPath);
+                https
+                  .get(videoUrl, (response) => {
+                    response.pipe(file);
+                    file.on("finish", async () => {
+                      file.close();
+                      findRecord.videoUrl = videoUrl;
+                      await findRecord.save();
+                      res.download(videoPath);
+                    });
+                  })
+                  .on("error", (err) => {
+                    fs.unlink(videoPath, () => {}); // Delete the file asynchronously if an error occurs
+                    console.error("Error writing video file:", err);
+                    res.status(500).json({ error: "Error saving video file" });
+                  });
               }
             })
-            .catch((err) => console.error("error:" + err));
+            .catch((err) => {
+              console.error("Error fetching bot data:", err);
+              res.status(500).json({ error: "Error fetching bot data" });
+            });
         }
       }
     }, 60);
