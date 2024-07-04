@@ -106,7 +106,8 @@ router.post("/webhooks", async (req, res) => {
       if (
         req.body.data &&
         req.body.data.bot_id &&
-        req.body.data.status.code === "done"
+        (req.body.data.status.code === "done" ||
+          req.body.data.status.code === "call_ended")
       ) {
         findRecord = await Record.findOne({
           botId: req.body.data.bot_id,
