@@ -131,7 +131,7 @@ router.post("/webhooks", async (req, res) => {
           const recordDetail = new RecordDetails({
             recordId: findRecord._id,
             meetingUrl: findRecord.meetingUrl,
-            user: req.user.id,
+            user: findRecord.user,
           });
           const savedRecordDetails = await recordDetail.save();
           if (savedRecordDetails) {
