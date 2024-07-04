@@ -101,6 +101,16 @@ router.post(
 router.post("/webhooks", async (req, res) => {
   try {
     console.log(req.body);
+    setTimeout(async () => {
+      if (req.body.data && req.body.data.bot_id) {
+        findRecord = Record.findById(req.body.data.bot_id);
+        if (findRecord) {
+          findRecord.status = req.body.data.status.code;
+          await findRecord.save();
+          console.log("Record updated successfully:", findRecord);
+        }
+      }
+    }, 180000); // 180 seconds delay
     // setTimeout(async () => {
     //   if (
     //     req.body.event === "done" ||
