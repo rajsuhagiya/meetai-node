@@ -117,8 +117,8 @@ router.post("/webhooks", async (req, res) => {
           await findRecord.save();
           console.log("Record updated successfully:", findRecord);
         }
-        console.log(botId, "botId");
-        const url = `https://api.recall.ai/api/v1/bot/${botId}/`;
+        console.log(req.body.data.bot_id, "botId");
+        const url = `https://api.recall.ai/api/v1/bot/${req.body.data.bot_id}/`;
         const options = {
           method: "GET",
           headers: { accept: "application/json" },
