@@ -122,7 +122,10 @@ router.post("/webhooks", async (req, res) => {
         const url = `https://api.recall.ai/api/v1/bot/${bot_id}/`;
         const options = {
           method: "GET",
-          headers: { accept: "application/json" },
+          headers: {
+            accept: "application/json",
+            Authorization: APIKEY,
+          },
         };
 
         fetch(url, options)
