@@ -74,7 +74,7 @@ router.post(
         const result = fetch(url, options)
           .then((res) => res.json())
           .then(async (json) => {
-            // console.log(json);
+            console.log(json, "ffffffffff");
             if (json.id) {
               const record = new Record({
                 meetingName,
