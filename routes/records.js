@@ -140,11 +140,12 @@ router.post("/webhooks", async (req, res) => {
               console.log(json, "bot_get_data");
               if (json.video_url) {
                 const videoUrl = json.video_url;
+                const videoFilename = path.basename(videoUrl.split("?")[0]); // Extract filename without query parameters
                 const videoPath = path.join(
                   __dirname,
                   "public",
                   "records",
-                  path.basename(videoUrl)
+                  videoFilename
                 );
 
                 // Ensure the directory exists
