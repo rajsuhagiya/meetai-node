@@ -6,8 +6,6 @@ const Setting = require("../models/Setting");
 const Folder = require("../models/Folder");
 const { body, validationResult } = require("express-validator");
 const fetch = require("node-fetch");
-const path = require("path");
-const fs = require("fs");
 const fetchuser = require("../middleware/fetchuser");
 
 const Recall = "us-west-2.recall.ai";
@@ -111,198 +109,45 @@ function generateUniqueSuffix() {
 router.post("/webhooks", async (req, res) => {
   try {
     console.log(req.body);
-
     setTimeout(async () => {
-      const { data, event } = req.body;
-      const { bot_id, status } = data || {};
-
+      let bot_id = req.body.data.bot_id;
       if (
-        data &&
-        bot_id &&
-        (event === "done" || status.code === "call_ended")
+        req.body.event === "done" ||
+        req.body.data.status.code === "call_ended"
       ) {
-        const findRecord = await Record.findOne({ botId: bot_id });
-        if (!findRecord) return res.status(404).send("Record not found");
-
-        const uniqueSuffix = generateUniqueSuffix();
-        const videoUrlName = `${findRecord.meetingName}-${uniqueSuffix}`;
-        findRecord.status = status.code;
-        await findRecord.save();
-        console.log("Record updated successfully:", findRecord);
-
-        const recordDetail = new RecordDetails({
-          recordId: findRecord._id,
-          meetingUrl: findRecord.meetingUrl,
-          user: findRecord.user,
+        findRecord = await Record.findOne({
+          botId: req.body.data.bot_id,
         });
-        const savedRecordDetails = await recordDetail.save();
+        if (findRecord) {
+          findRecord.status = req.body.data.status.code;
+          await findRecord.save();
+          console.log("Record updated successfully:", findRecord);
+          const url = `https://${Recall}/api/v1/bot/${bot_id}/`;
+          const options = {
+            method: "GET",
+            headers: {
+              accept: "application/json",
+              Authorization: APIKEY,
+            },
+          };
 
-        if (!savedRecordDetails)
-          return res.status(500).send("Error saving record details");
-
-        const url = `https://${Recall}/api/v1/bot/${bot_id}/`;
-        const options = {
-          method: "GET",
-          headers: {
-            accept: "application/json",
-            Authorization: APIKEY,
-          },
-        };
-
-        try {
-          const response = await fetch(url, options);
-          const json = await response.json();
-
-          if (!json.video_url)
-            return res.status(404).send("Video URL not found");
-
-          const findRecordDetails = await RecordDetails.findOne({
-            recordId: findRecord._id,
-          });
-          if (!findRecordDetails)
-            return res.status(404).send("Record details not found");
-
-          findRecordDetails.videoUrl = json.video_url;
-          await findRecordDetails.save();
-
-          const oldPath = path.join(
-            __dirname,
-            "public",
-            "records",
-            json.video_url
-          );
-          const newPath = path.join(
-            __dirname,
-            "public",
-            "records",
-            videoUrlName
-          );
-
-          fs.rename(oldPath, newPath, (err) => {
-            if (err) {
-              console.error("Error renaming the file:", err);
-              return res.status(500).send("Error renaming the file");
-            }
-            console.log("File renamed successfully!");
-            res.download(newPath);
-          });
-        } catch (err) {
-          console.error("Error fetching bot data:", err);
-          res.status(500).send("Error fetching bot data");
+          fetch(url, options)
+            .then((res) => res.json())
+            .then(async (json) => {
+              console.log(json, "bot_get_data");
+              if (json.video_url) {
+                findRecord.videoUrl = json.video_url;
+                await findRecord.save();
+                res.download(`./public/records/${json.video_url}`);
+              }
+            })
+            .catch((err) => console.error("error:" + err));
         }
-      } else {
-        res.status(400).send("Invalid request data");
       }
-    }, 60000); // 60 seconds delay
+    }, 60);
   } catch (e) {
-    console.error("Error:", e);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
-// router.post("/webhooks", async (req, res) => {
-//   try {
-//     console.log(req.body);
-//     setTimeout(async () => {
-//       let bot_id = req.body.data.bot_id;
-//       if (
-//         req.body.data &&
-//         req.body.data.bot_id &&
-//         (req.body.event === "done" ||
-//           req.body.data.status.code === "call_ended")
-//       ) {
-//         findRecord = await Record.findOne({
-//           botId: req.body.data.bot_id,
-//         });
-//         if (findRecord) {
-//           const uniqueSuffix = generateUniqueSuffix();
-//           const videoUrlName = `${findRecord.meetingName}-${uniqueSuffix}`;
-//           findRecord.status = req.body.data.status.code;
-//           await findRecord.save();
-//           console.log("Record updated successfully:", findRecord);
-//           console.log(bot_id, "botId");
-//           //save record in record details
-//           const recordDetail = new RecordDetails({
-//             recordId: findRecord._id,
-//             meetingUrl: findRecord.meetingUrl,
-//             user: findRecord.user,
-//           });
-//           const savedRecordDetails = await recordDetail.save();
-//           if (savedRecordDetails) {
-//             const url = `https://${Recall}/api/v1/bot/${bot_id}/`;
-//             const options = {
-//               method: "GET",
-//               headers: {
-//                 accept: "application/json",
-//                 Authorization: APIKEY,
-//               },
-//             };
-
-//             fetch(url, options)
-//               .then((res) => res.json())
-//               .then(async (json) => {
-//                 console.log(json, "bot_get_data");
-//                 // const video_name =
-//                 if (json.video_url) {
-//                   const findRecordDetails = await RecordDetails.findOne({
-//                     recordId: findRecord._id,
-//                   });
-//                   if (findRecordDetails) {
-//                     findRecordDetails.videoUrl = json.videoUrl;
-//                     await findRecordDetails.save();
-//                   }
-//                   res.download(`./public/records/${json.video_url}`);
-//                 }
-//               })
-//               .catch((err) => console.error("error:" + err));
-//           }
-//         }
-//       }
-//     }, 60); // 180 seconds delay
-//     // setTimeout(async () => {
-//     //   if (
-//     //     req.body.event === "done" ||
-//     //     req.body.data.status.code === "call_ended"
-//     //   ) {
-//     //     await reCallAiService.changeMeetingStatus(req.body.data.bot_id);
-//     //   }
-//     // }, 180000); // 180 seconds delay
-
-//     // console.log(req.body, "-------");
-
-//     // if (req.body.data.status.code === "fatal") {
-//     //   const record = await Record.findOne({
-//     //     recall_bot_id: req.body.data.bot_id,
-//     //     recall_bot_id: { $ne: null },
-//     //   });
-//     //   if (record) {
-//     //     await RecordDetails.create({
-//     //       user_id: record.user_id,
-//     //       client_id: record.client_id,
-//     //       name: record.name,
-//     //       context: "Call transcript of " + record.name,
-//     //       data: "",
-//     //       component: "action-ai",
-//     //       ai_meeting_id: record._id,
-//     //       is_private: true,
-//     //       status: "Completed",
-//     //       indexing_status: "Completed",
-//     //       is_url: false,
-//     //       word_count: 0,
-//     //     });
-
-//     //     await Record.updateOne({ status: "Failed" });
-//     //   }
-//     // }
-
-//     // res.status(200).json({
-//     //   message: "Meeting status changed successfully.",
-//     //   data: [],
-//     //   status: 200,
-//     // });
-//   } catch (e) {
-//     res.status(500).json({ error: "Internal Server Error" });
-//   }
-// });
 
 module.exports = router;

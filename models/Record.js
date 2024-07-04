@@ -14,6 +14,10 @@ const RecordsSchema = new Schema({
     type: String,
     required: true,
   },
+  videoUrl: {
+    type: String,
+    default: "null",
+  },
   botId: {
     type: String,
   },
