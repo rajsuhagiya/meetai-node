@@ -9,7 +9,7 @@ const fetch = require("node-fetch");
 const fetchuser = require("../middleware/fetchuser");
 const fs = require("fs");
 const path = require("path");
-const https = require("https");
+const ytdl = require("ytdl-core");
 
 const Recall = "us-west-2.recall.ai";
 const APIKEY = "f3da1c8372f7d6cb4d1b8f3c4f3ace179ad643e2";
@@ -103,21 +103,49 @@ router.post(
   }
 );
 
-function generateUniqueSuffix() {
-  const now = new Date();
-  const milliseconds = now.getTime(); // Get the number of milliseconds since January 1, 1970
-  return milliseconds;
-}
+const storeVideo = (video_url) => {
+  const dir = path.join(__dirname, "..", "public", "records");
+
+  // Check if the directory exists, if not, create it
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+
+  // Generate a unique filename using the current time in milliseconds
+  const uniqueNumber = Date.now();
+  const filename = `record-${uniqueNumber}.mp4`;
+  const filePath = path.join(dir, filename);
+  ytdl(`${video_url}`).pipe(fs.createWriteStream(filePath));
+  return filename;
+};
+
+router.get("/demo", (req, res) => {
+  const dir = path.join(__dirname, "..", "public", "records");
+
+  // Check if the directory exists, if not, create it
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+
+  // Generate a unique filename using the current time in milliseconds
+  const uniqueNumber = Date.now();
+  const filename = `record-${uniqueNumber}.mp4`;
+  const filePath = path.join(dir, filename);
+  ytdl("https://www.youtube.com/shorts/MLMZK82lXqc").pipe(
+    fs.createWriteStream(filePath)
+  );
+  return filename;
+});
 
 router.post("/webhooks", async (req, res) => {
   try {
-    console.log(req.body);
     setTimeout(async () => {
       let bot_id = req.body.data.bot_id;
       if (
         req.body.event === "done" ||
         req.body.data.status.code === "call_ended"
       ) {
+        console.log(req.body);
         const findRecord = await Record.findOne({
           botId: req.body.data.bot_id,
         });
@@ -139,47 +167,12 @@ router.post("/webhooks", async (req, res) => {
             .then(async (json) => {
               console.log(json, "bot_get_data");
               if (json.video_url) {
-                const videoUrl = json.video_url;
-                const videoFilename = path.basename(videoUrl.split("?")[0]); // Extract filename without query parameters
-                const videoPath = path.join(
-                  __dirname,
-                  "public",
-                  "records",
-                  videoFilename
-                );
-
-                // Ensure the directory exists
-                fs.mkdir(
-                  path.dirname(videoPath),
-                  { recursive: true },
-                  (err) => {
-                    if (err) {
-                      console.error("Error creating directory:", err);
-                      return res
-                        .status(500)
-                        .json({ error: "Error creating directory" });
-                    }
-
-                    const file = fs.createWriteStream(videoPath);
-                    https
-                      .get(videoUrl, (response) => {
-                        response.pipe(file);
-                        file.on("finish", async () => {
-                          file.close();
-                          findRecord.videoUrl = videoUrl;
-                          await findRecord.save();
-                          res.download(videoPath);
-                        });
-                      })
-                      .on("error", (err) => {
-                        fs.unlink(videoPath, () => {}); // Delete the file asynchronously if an error occurs
-                        console.error("Error writing video file:", err);
-                        res
-                          .status(500)
-                          .json({ error: "Error saving video file" });
-                      });
-                  }
-                );
+                const videoUrl = storeVideo(videoUrl);
+                if (videoUrl) {
+                  findRecord.videoUrl = videoUrl;
+                  await findRecord.save();
+                }
+                res.status(200).json({ message: "Record Saved" });
               }
             })
             .catch((err) => {
