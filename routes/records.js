@@ -168,9 +168,11 @@ router.post("/webhooks", async (req, res) => {
               console.log(json, "bot_get_data");
               if (json.video_url) {
                 const videoUrl = storeVideo(videoUrl);
+                console.log(videoUrl, "-------");
                 if (videoUrl) {
                   findRecord.videoUrl = videoUrl;
                   await findRecord.save();
+                  console.log("Record Saved");
                 }
                 res.status(200).json({ message: "Record Saved" });
               }
