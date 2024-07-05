@@ -167,7 +167,7 @@ router.post("/webhooks", async (req, res) => {
             .then(async (json) => {
               console.log(json, "bot_get_data");
               if (json.video_url) {
-                const videoUrl = storeVideo(videoUrl);
+                const videoUrl = storeVideo(json.video_url);
                 console.log(videoUrl, "-------");
                 if (videoUrl) {
                   findRecord.videoUrl = videoUrl;
