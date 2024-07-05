@@ -106,7 +106,7 @@ router.post(
 );
 
 const storeVideo = (video_url) => {
-  const dir = path.join(__dirname, "..", "public", "records");
+  const dir = path.join(__dirname, "..", "records");
 
   // Check if the directory exists, if not, create it
   if (!fs.existsSync(dir)) {
