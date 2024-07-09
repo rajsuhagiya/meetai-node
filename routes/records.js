@@ -3,15 +3,18 @@ const router = express.Router();
 const Record = require("../models/Record");
 const RecordDetails = require("../models/RecordDetails");
 const Setting = require("../models/Setting");
+const User = require("../models/User");
 const Folder = require("../models/Folder");
 const { body, validationResult } = require("express-validator");
 const fetch = require("node-fetch");
 const fetchuser = require("../middleware/fetchuser");
 const fs = require("fs");
 const https = require("https");
+const { format } = require("date-fns");
 
 const path = require("path");
 const ytdl = require("ytdl-core");
+const { type } = require("os");
 
 const Recall = "us-west-2.recall.ai";
 const APIKEY = "f3da1c8372f7d6cb4d1b8f3c4f3ace179ad643e2";
@@ -28,19 +31,44 @@ router.get("/getbot", fetchuser, async (req, res) => {
 });
 
 router.get("/getRecords", fetchuser, async (req, res) => {
+  console.log("---------");
   const userId = req.user.id;
-  const recordQuery = await Record.find({ user: userId });
+  const publicFolders = await Folder.find({ accessType: "public" });
+  console.log(publicFolders);
+
+  const recordQuery = await Record.find({
+    $or: [
+      { user: userId }, // Records belonging to the logged-in user
+      {
+        $and: [
+          {
+            folder: {
+              $in: await Folder.find({
+                accessType: "public",
+              }),
+            },
+            user: {
+              $in: await User.find({
+                companyId: userId,
+              }),
+            },
+          }, // Folder type is public and belongs to the company
+        ],
+      },
+    ],
+  })
+    .populate("folder", "folderName accessType")
+    .populate("user", "companyId");
   console.log(recordQuery);
-  // const recordQuery = await Record.find({ user: userId })
-  //   .populate("bot", "botName")
-  //   .populate("folder", "folderName");
-  // console.log(recordQuery);
-  // const records = recordQuery.map((record) => ({
-  //   meetingName: record.meetingName,
-  //   mettingUrl: record.meetingUrl,
-  //   bot: record.bot,
-  // }));
-  // res.status(200).json({ records });
+  const records = recordQuery.map((record) => ({
+    name: record.meetingName,
+    type: record.folder.accessType,
+    status: record.status,
+    date: format(record.joinAt, "MM-dd-yyyy"),
+    time: format(record.joinAt, "HH:mm:ss"),
+    folder: record.folder.folderName,
+  }));
+  res.status(200).json({ recordQuery, records });
 });
 
 router.post(
@@ -158,6 +186,8 @@ router.get("/demo2", (req, res) => {
 
 router.post("/webhooks", async (req, res) => {
   try {
+    console.log(req.body.event, "-----------event");
+    console.log(req.body.data.status.code, "-----------call_ended");
     setTimeout(async () => {
       let bot_id = req.body.data.bot_id;
       if (

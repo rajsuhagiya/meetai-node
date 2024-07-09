@@ -4,11 +4,11 @@ const { Schema } = mongoose;
 const RecordsDetailsSchema = new Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "user",
+    ref: "User",
   },
   recordId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "record",
+    ref: "Record",
   },
   image: {
     type: String,
@@ -60,4 +60,4 @@ const RecordsDetailsSchema = new Schema({
   },
 });
 
-module.exports = mongoose.model("recordsDetails", RecordsDetailsSchema);
+module.exports = mongoose.model("RecordsDetail", RecordsDetailsSchema);

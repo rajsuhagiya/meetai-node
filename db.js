@@ -5,7 +5,10 @@ const mongoURL =
   "mongodb+srv://meetai:meetai@cluster0.6ujy5fh.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 const connectToMongo = () => {
-  mongoose.connect(mongoURL);
+  mongoose.connect(mongoURL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
   console.log("connected to mongoose");
 };
 

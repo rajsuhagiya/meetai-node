@@ -19,7 +19,7 @@ const UserSchema = new Schema({
   },
   companyId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "user",
+    ref: "User",
   },
   password: {
     type: String,
@@ -42,4 +42,4 @@ const UserSchema = new Schema({
 // const User = mongoose.model("user", UserSchema);
 // User.createIndexes();
 // module.exports = User;
-module.exports = mongoose.model("user", UserSchema);
+module.exports = mongoose.model("User", UserSchema);

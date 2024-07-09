@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 const SettingsSchema = new Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "user",
+    ref: "User",
   },
   botName: {
     type: String,
@@ -16,4 +16,4 @@ const SettingsSchema = new Schema({
   },
 });
 
-module.exports = mongoose.model("setting", SettingsSchema);
+module.exports = mongoose.model("Setting", SettingsSchema);

@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const { body, validationResult } = require("express-validator");
 const Folder = require("../models/Folder");
+const User = require("../models/User");
+const Record = require("../models/Record");
 const fetchuser = require("../middleware/fetchuser");
 
 router.post(
@@ -33,15 +35,50 @@ router.post(
 );
 
 router.get("/getfolders", fetchuser, async (req, res) => {
-  try {
-    userId = req.user.id;
-    const folders = await Folder.find({
-      $or: [{ user: userId }, { accessType: "public" }],
-    });
-    res.send(folders);
-  } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
-  }
+  // try {
+  user_id = req.user.id;
+  const user = await User.findById(user_id);
+  console.log(user);
+
+  const foldersQuery = await Folder.find({
+    $or: [
+      { user: user_id },
+      {
+        accessType: "public",
+        user: { $in: await User.find({ companyId: user_id }) },
+      },
+      {
+        accessType: "public",
+        user: { $in: await User.find({ _id: user.companyId }) },
+      },
+    ],
+  });
+
+  const folders = await Promise.all(
+    foldersQuery.map(async (folder) => {
+      const countRecord = await Record.countDocuments({ folder: folder._id });
+      return {
+        ...folder.toObject(),
+        countRecord,
+      };
+    })
+  );
+
+  console.log(folders, "fol");
+  res.send(folders);
+  // } catch (error) {
+  //   res.status(500).json({ error: "Internal Server Error" });
+  // }
+});
+
+router.post("/update-folder/:id", fetchuser, async (req, res) => {
+  const folder = await Folder.findById(req.params.id);
+  folder.folderName = req.body.folderName;
+  folder.accessType = req.body.accessType;
+  folder.save();
+  res
+    .status(200)
+    .json({ success: "Folder Updated Successfully", status: 200, folder });
 });
 
 module.exports = router;

@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 const FoldersSchema = new Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "user",
+    ref: "User",
   },
   folderName: {
     type: String,
@@ -20,4 +20,4 @@ const FoldersSchema = new Schema({
   },
 });
 
-module.exports = mongoose.model("folders", FoldersSchema);
+module.exports = mongoose.model("Folder", FoldersSchema);

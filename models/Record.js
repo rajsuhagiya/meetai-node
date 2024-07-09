@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 const RecordsSchema = new Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "user",
+    ref: "User",
   },
   meetingName: {
     type: String,
@@ -23,11 +23,11 @@ const RecordsSchema = new Schema({
   },
   bot: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "settings",
+    ref: "Setting",
   },
   folder: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "folder",
+    ref: "Folder",
   },
   status: {
     type: String,
@@ -39,4 +39,4 @@ const RecordsSchema = new Schema({
   },
 });
 
-module.exports = mongoose.model("records", RecordsSchema);
+module.exports = mongoose.model("Record", RecordsSchema);

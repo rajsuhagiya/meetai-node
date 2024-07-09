@@ -156,6 +156,15 @@ router.put(
         return res.status(404).send("Not Found");
       }
 
+      if (email !== user.email) {
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+          return res
+            .status(400)
+            .json({ error: "User with this email already exists" });
+        }
+      }
+
       user = await User.findByIdAndUpdate(
         req.params.id,
         { $set: editUser },
@@ -217,6 +226,32 @@ router.delete("/deleteUser/:id", fetchuser, async (req, res) => {
     }
     user = await User.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: "User Deleted Successfully", user });
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+router.put("/update-user/:id", fetchuser, async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    const findUser = await User.findById(req.params.id);
+    if (!findUser) {
+      return res.status(404).json({ error: "User Not Found" });
+    }
+
+    if (email !== findUser.email) {
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return res
+          .status(400)
+          .json({ error: "User with this email already exists" });
+      }
+    }
+
+    findUser.name = name;
+    findUser.email = email;
+    await findUser.save();
+    res.status(200).json({ message: "User Updated Successfully", findUser });
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }
