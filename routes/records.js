@@ -9,11 +9,13 @@ const { body, validationResult } = require("express-validator");
 const fetch = require("node-fetch");
 const fetchuser = require("../middleware/fetchuser");
 const fs = require("fs");
+const ytdl = require("ytdl-core");
+const path = require("path");
+const { v4: uuidv4 } = require("uuid");
 const https = require("https");
 const { format } = require("date-fns");
+const cloudinary = require("cloudinary").v2;
 
-const path = require("path");
-const ytdl = require("ytdl-core");
 const { type } = require("os");
 
 const Recall = "us-west-2.recall.ai";
@@ -153,28 +155,71 @@ const storeVideo = (video_url) => {
   return filename;
 };
 
-router.get("/demo", (req, res) => {
-  const dir = path.join(__dirname, "..", "public", "records");
+router.get("/demo", async (req, res) => {
+  // const dir = path.join(__dirname, "..", "public", "records");
 
-  // Check if the directory exists, if not, create it
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
+  // // Check if the directory exists, if not, create it
+  // if (!fs.existsSync(dir)) {
+  //   fs.mkdirSync(dir, { recursive: true });
+  // }
 
-  // Generate a unique filename using the current time in milliseconds
-  const uniqueNumber = Date.now();
-  const filename = `record-${uniqueNumber}.mp4`;
-  const filePath = path.join(dir, filename);
+  // // Generate a unique filename using the current time in milliseconds
+  // const uniqueNumber = Date.now();
+  // const filename = `record-${uniqueNumber}.mp4`;
+  // const filePath = path.join(dir, filename);
   const url =
     "https://us-west-2-recallai-production-bot-data.s3.amazonaws.com/35be85a7-2b92-415a-86da-fbf34cf5d836/AROA3Z2PRSQANGTUQXHNJ%3Ai-0b735182ecb6f2571/video-c4ab2310-2419-4cae-88d4-45b7c3013b2b.mp4?AWSAccessKeyId=ASIA3Z2PRSQAJYWK5HGG&Signature=CbAPUGyv2BNyrU16ySYPDqeDNAM%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEAYaCXVzLXdlc3QtMiJHMEUCIAk%2Fkxpxa1C3f%2BtauEgyTHi35uFJlHNt3nmhgTKbEY%2B1AiEA3Lhl6XA1805MnceLtQRnU0PMKtH4RTmb8v1o5hvnhnsqwgUIv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw4MTEzNzg3NzUwNDAiDGZCsS5D%2FmKq3tJehiqWBSdqLkdYqVHt6Hyd8jP264Uo8znbMY5fQt2S20UhWNgP70PWKN44RcjR%2FCQkoJxcQsoi31BYM9xJDWWQ6VMTKiLQOWA8hIijyaETFlIt6MI%2FJFBKTZNfY2Kprj2Hy5fffTw%2FnzMlAv7WcTt8ntqkhgznsalL0zvn12N%2BJrEtCQBGtajTMYKzTPLk4PPj%2FdtDAbn87FqxmsZKOiLHFBPKdi5TE%2BhDsYA4OFTkO3yFC%2BZysvKY1GVmyz9PtFCowI8c2%2FytMXARq%2BziUT%2F%2BLnITFzujbraIijA%2BZiFqNb4hJry93ajde1I0dtQvum5AKyIe%2B61KVuxOTJ%2Fp3lWC4o0cG2ISIhIxcRLDeuLo8SjXrziZ5B5eYUCDpYHDQbmm9%2BMfygoivVHS9aMwXjZ2C8Q2DOBovkuxDOCELKYpCEilNRYmtvZIlzsJc%2FXgARi1TU0Rm0ZvVQVa0Qq1j6rwkpGT6HxrPasyfmf4QDQ90M27DtDpRoHrPjaO9lUVqRyaSmKGdo8D8EP6fKBj0AGk7fBVdYudCHe1ccgx2NE1ZHhLMhvb40fG3p4i5HEarfe4Am%2Bxf1gT3UBtUVHhZVO6ydSkjE21lJYEaIaOnns3VUD3rpWO%2BBhJuVvn%2FLHRSo%2FubJa9muBuj5ntoTA9aD0TGMtrqPeLdf6RJDFKBoFy48XibVyIRN30xgerJL5Fm%2FzoG6gIrSb2c%2Bb%2ByOmChAMuT57QogYwdC1%2BaqotW4%2BFCeF9mO2UaYZN4pKa1V1oA2s9h8D1IrYpmZTVcOAdx7Bz%2FQeHpVrqxPcekOCjsOVho%2F2HFkxe91tlejuk%2Feoe4PPvdY3QYeC1ZxVslfiUOaxeKUOEk3mLbnGf2UZfa7GvJKv%2BsoJrtA9PpK58MMfrn7QGOrEBryBf1vQxc3%2FvhyG2xWQA9RMLMaV2gFrKsVykh%2BVtZWbdEDmFxtu1OXnvqBpibF83PZY3CZLeWP8VBO1mU1ExgD%2B712EOtslTK2DC76TPPM7Aieir9P3eTQdNyJEKwZKQXg1Q%2BRBRKCOjNur8rZiF6Ra5Cg87%2BPau086Dj%2FdwfpXVRPDAfdb3MW5XiDhtxpmNF67eyJLdaD%2BW3vKeoGbOwKbI9LChBUnMTenCMzJPxunV&Expires=1720214972";
   // ytdl(
   //   "https://us-west-2-recallai-production-bot-data.s3.amazonaws.com/35be85a7-2b92-415a-86da-fbf34cf5d836/AROA3Z2PRSQANGTUQXHNJ%3Ai-0b735182ecb6f2571/video-c4ab2310-2419-4cae-88d4-45b7c3013b2b.mp4?AWSAccessKeyId=ASIA3Z2PRSQAJYWK5HGG&Signature=CbAPUGyv2BNyrU16ySYPDqeDNAM%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEAYaCXVzLXdlc3QtMiJHMEUCIAk%2Fkxpxa1C3f%2BtauEgyTHi35uFJlHNt3nmhgTKbEY%2B1AiEA3Lhl6XA1805MnceLtQRnU0PMKtH4RTmb8v1o5hvnhnsqwgUIv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw4MTEzNzg3NzUwNDAiDGZCsS5D%2FmKq3tJehiqWBSdqLkdYqVHt6Hyd8jP264Uo8znbMY5fQt2S20UhWNgP70PWKN44RcjR%2FCQkoJxcQsoi31BYM9xJDWWQ6VMTKiLQOWA8hIijyaETFlIt6MI%2FJFBKTZNfY2Kprj2Hy5fffTw%2FnzMlAv7WcTt8ntqkhgznsalL0zvn12N%2BJrEtCQBGtajTMYKzTPLk4PPj%2FdtDAbn87FqxmsZKOiLHFBPKdi5TE%2BhDsYA4OFTkO3yFC%2BZysvKY1GVmyz9PtFCowI8c2%2FytMXARq%2BziUT%2F%2BLnITFzujbraIijA%2BZiFqNb4hJry93ajde1I0dtQvum5AKyIe%2B61KVuxOTJ%2Fp3lWC4o0cG2ISIhIxcRLDeuLo8SjXrziZ5B5eYUCDpYHDQbmm9%2BMfygoivVHS9aMwXjZ2C8Q2DOBovkuxDOCELKYpCEilNRYmtvZIlzsJc%2FXgARi1TU0Rm0ZvVQVa0Qq1j6rwkpGT6HxrPasyfmf4QDQ90M27DtDpRoHrPjaO9lUVqRyaSmKGdo8D8EP6fKBj0AGk7fBVdYudCHe1ccgx2NE1ZHhLMhvb40fG3p4i5HEarfe4Am%2Bxf1gT3UBtUVHhZVO6ydSkjE21lJYEaIaOnns3VUD3rpWO%2BBhJuVvn%2FLHRSo%2FubJa9muBuj5ntoTA9aD0TGMtrqPeLdf6RJDFKBoFy48XibVyIRN30xgerJL5Fm%2FzoG6gIrSb2c%2Bb%2ByOmChAMuT57QogYwdC1%2BaqotW4%2BFCeF9mO2UaYZN4pKa1V1oA2s9h8D1IrYpmZTVcOAdx7Bz%2FQeHpVrqxPcekOCjsOVho%2F2HFkxe91tlejuk%2Feoe4PPvdY3QYeC1ZxVslfiUOaxeKUOEk3mLbnGf2UZfa7GvJKv%2BsoJrtA9PpK58MMfrn7QGOrEBryBf1vQxc3%2FvhyG2xWQA9RMLMaV2gFrKsVykh%2BVtZWbdEDmFxtu1OXnvqBpibF83PZY3CZLeWP8VBO1mU1ExgD%2B712EOtslTK2DC76TPPM7Aieir9P3eTQdNyJEKwZKQXg1Q%2BRBRKCOjNur8rZiF6Ra5Cg87%2BPau086Dj%2FdwfpXVRPDAfdb3MW5XiDhtxpmNF67eyJLdaD%2BW3vKeoGbOwKbI9LChBUnMTenCMzJPxunV&Expires=1720214972"
   // ).pipe(fs.createWriteStream(filePath));
-  const file = fs.createWriteStream(filePath);
-  const request = https.get(url, function (response) {
-    response.pipe(file);
+  const cloudName = "dbthjxcj7";
+  let videoApi = `https://api.cloudinary.com/v1_1/${cloudName}/video/upload`;
+  // Configuration
+  cloudinary.config({
+    cloud_name: "dbthjxcj7",
+    api_key: "288821489515297",
+    api_secret: "u6ud3EKR6A8BWCxVZfMdNUCTxdc", // Click 'View Credentials' below to copy your API secret
   });
-  return filename;
+
+  // Upload an image
+  const videoUrl = "https://www.youtube.com/watch?v=paiO6M2wBqE";
+  const uniqueNumber = uuidv4();
+  const tempFilePath = path.join(__dirname, `video-${uniqueNumber}.mp4`);
+
+  // Download video from YouTube
+  const videoStream = ytdl(videoUrl);
+  const writeStream = fs.createWriteStream(tempFilePath);
+
+  videoStream.pipe(writeStream);
+
+  writeStream.on("finish", async () => {
+    try {
+      // Upload to Cloudinary
+      const result = await cloudinary.uploader.upload(tempFilePath, {
+        resource_type: "video",
+        folder: "video",
+      });
+
+      // Remove the local file after upload
+      fs.unlinkSync(tempFilePath);
+
+      return res.status(200).send(result);
+    } catch (uploadErr) {
+      fs.unlinkSync(tempFilePath); // Remove the local file on error as well
+      return res.status(500).send(uploadErr);
+    }
+  });
+
+  writeStream.on("error", (err) => {
+    return res.status(500).send(err);
+  });
+
+  // console.log(uploadResult);
+  // const file = fs.createWriteStream(filePath);
+  // const request = https.get(url, function (response) {
+  //   response.pipe(file);
+  // });
+  // return filename;
 });
 
 router.get("/demo2", (req, res) => {
