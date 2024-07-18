@@ -165,7 +165,7 @@ router.post("/raj", async (req, res) => {
   // Upload an image
   const uploadResult = await cloudinary.uploader
     .upload(
-      "https://us-west-2-recallai-production-bot-data.s3.amazonaws.com/28148593-c23a-4484-a63d-651bb79e0708/AROA3Z2PRSQANGTUQXHNJ%3Ai-05ca10cc21a82045b/video-ee071242-c07c-47e4-9f97-0b4dcb6d77bd.mp4?AWSAccessKeyId=ASIA3Z2PRSQAHG6BRY6L&Signature=u6o2seCIE%2Fl%2BGtMiPWlfg81l8zI%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEDwaCXVzLXdlc3QtMiJHMEUCIEffWchdlGlog%2FdPziDJlND7LmyUsQVicNUo3emuC7EyAiEApQecAt4%2BLse%2Bj1tNhQSr9wOQ28YN%2FXzIU5SzsUiLTdEqugUIFRAAGgw4MTEzNzg3NzUwNDAiDJhrXfvsdstb4%2FZ7mSqXBRvyw5dfPMBCmHTb53RPayhFJ%2BtdcKmQ3qWSl8HQaRH%2Fh9o8z3LePx4yk8VSQD1yHkzs9WlaT1U%2BplGRK5VMRt9M3VkwEekmp0c2P9pHL6UcDGWLkSUVKosMEKheEKkc6Zjgtuy5KIYUinAMaJhLFNeWIu3BVxh3orGWq7%2FZbVwMLggotYdncwp7dDaSOwx0%2Bi%2Bn2K5r4hOiFaiHvR0gFWVVcyLnbw%2F%2BjOObMffDMe7YsME5GqzVwg7G430ORrnmNWg6yB0LGL99Lqme%2FaexuvI%2F3XMkv7LBmWDtgxCvbeA%2BghI2ZzjFL611eeOe8mVZzRYdelzqyjVh4rxL0NCrNXwI%2Fzpkt7GGEJEQib5FpFCjiqLlthHeHtHM9wzvZS9cRhuzI2ubdYD%2F7SoImBS7jXs%2BFckWUmm3ULOHlQAg1fF2iSKJyH7DL%2FKNE9AjWdbh7F3ra1rfLenO%2BlVdYSG4sCxZx8ZezgP0y0ehXSfzF8H90sVfKWkeKsV5QkFmr2seJE2pBP5OUGi2VRCVUpjrpHub5YFvKA2ggvpz9KvyLr0uagsxcUKpKo7jLb9xqRFwRHnisEAAoNatB5Ye8zAuBAr7VunFRY1CCgZdMkMqVtA26n4ZxqqgP%2BkBjO0OKFcPw3wIJxWVwExYQ1pabsSk%2Byd8vevdXn%2B0KpKSr4Wu86HugY6Vyt5u%2BzfUD8FcD1FtDA%2B633WvW1WLZ8HjbEEyBMP3%2BXBs%2FnuwDX17rJovxOpclXy7pJeXo2jSaLOr1BFy1MtcfOE0CpaQtV34iFJAoJiV1cxSXuO58QVDImiLrrzN8GMZJFuAY%2BvnrEcLNFDhrX6PGDrWBXU%2BL13yvaZLhDtt%2BIcPo%2BuU81yBwCJICVH1K9Yr2jHRRDDy%2BeO0BjqxAbmh%2BdNRC2Fw8BEnkM5izhk%2BjtMwEKYKV9tOC6YDw%2BB5u7ubA%2FNXmTJ%2BgpDfqGmnidlac%2FclZDp8mfEQlZDoBwpvMjbdIIHCR5zhf5yHAKTOjrAWP%2FcLZFLJMm5%2FkWOLVna6n29X2zV%2FJzwZ6TJUB%2BphfvZBNwDD9BwaOPkP1ZQ3Y5QUp%2FFq3rzKJWD6b8u7ry%2FfCZ%2B3Yk5nExG2vV775yJhLEVf19r6OY8c6IR5%2Bg1W7w%3D%3D&Expires=1721345988",
+      "https://us-west-2-recallai-production-bot-data.s3.amazonaws.com/03dad7d8-dcbf-4908-bb1d-60f89f0ad7b0/AROA3Z2PRSQANGTUQXHNJ%3Ai-0a828fccb7d897648/video-690afef7-0287-4fdb-828b-48bd535397a5.mp4?AWSAccessKeyId=ASIA3Z2PRSQACX3A2H4S&Signature=qTj4oZjHBn8O8bfn145luho%2BUiY%3D&x-amz-security-token=IQoJb3JpZ2luX2VjED4aCXVzLXdlc3QtMiJGMEQCIQDsrI5EbNFQNX6i6yj0hONBsG4Mgk4DEzjEXB%2BnkyDXWAIfO2QjmzGduDR99Azd1v%2F4ZboT5FZLH2MyOZMHYqeReSq6BQgXEAAaDDgxMTM3ODc3NTA0MCIMndhaBVy%2BIGBe5igUKpcF7v1mcZAhb7gbM%2Fd56waR24MUwnWsnUxpS3Awbn4gIBscP8BBZS3FLJaGJa8elCyhArk5xJcYzdXUI%2Bpu8%2FGKlPxb5uW%2Br7tnG%2B6fxGotpHvprroHDtsMQczF4c7VslBpNXPrP86MCcgfeQpsJN%2B%2FuodSz1ZewbZBot0amqeISLd%2BLlVT21Qm1MxqL1qjMZ0fXHTObk6510Ft6DeCBHQokHEOcVDkezEqKsAGsyfP2RgKVcfqUoqHxI1k0s2vEacKtEEWbX5A5pEvv4nJQPocaaWeoONUrfNwmEGXLzSI0IUT7LiPU80r1JbDSdZ59DC0T9Kw6NPYXPDa3AuGJiZdpXNlNuPtC5iBhQCLQ7DMI9od5irRtbkhdC6bB8azmub5pgRI82V5FurF%2FJo2EpF8y9sl6PXKXiqwDTJUBhkWXp2b9LgwnY%2Fn%2FChMhpl2lhsCiTyh5C8queQBm1ZKmtKx5oslbMzLbQhptqX1jEIitwFhkUHbZE10xGOimBi1deatsXHEYxqQD2QSG0dkP6MX6CUnceNTANbViDSKfMOdyrjwfDNc5jpLY2zAuAPBMIN762ETbCwIRF2kMjLh87Cg9Pznv0QMGyAJQsPceX2w9%2FmZFBmATG3TjOkKg0wtJo20%2BO1PpZcE53cr%2BWtr5S2H4Bt6OWcdMoNTZBDgnNKFLrz9QLiR9Y9oLiAF34sEpXaevIS7Aa58NeHuGZjX8Z%2Fzj%2BWhB%2FVb1%2FfBHE7tbP2ATVo4NhRvg4nnaRGTrwDZ9eEWlxX8z3f9cGUPseIxP5nWLonmR844IZVuxKx6fFPCLMciF0hzY0cdlcUaK0Cp2%2F4jEwnqgHBE0bxqKAgWYWglmDNdNMJoMMP2unM2SU3%2F68XdmpsrkF2tMJGv5LQGOrIBwps7UxgOlbbVSvvL1XANB%2Bri09w9H9DZaF5NcqheIRLLsPaBN0%2BjKSMPLtsY9pCZqWGZaOqqJh%2BFHjRChdmAlaWEWPmMeVqEzMYcvQmdyr3oCcUSyXofr1bERzvf6qSV0MsXzg4F240c2Hrg6kJMlMG90IfncLBa21f0VHEFPkarXam7%2BXniK9X5Aj%2FIBxyXNQQPHTzkAhQoBWVJdNer5sHjIU7J4TcmnxlgzfNLSgp0Ug%3D%3D&Expires=1721348542",
 
       {
         asset_folder: "records",
@@ -286,29 +286,26 @@ router.post("/webhooks", async (req, res) => {
             .then(async (json) => {
               console.log(json, "bot_get_data");
               if (json.video_url) {
-                const videoUrl = storeVideo(json.video_url);
-                console.log(videoUrl, "-------");
-                if (videoUrl) {
-                  findRecord.videoUrl = videoUrl;
-                  await findRecord.save();
-                  console.log("Record Saved");
-                  const uniqueNumber = Date.now();
-                  cloudinary.config({
-                    cloud_name: "dbthjxcj7",
-                    api_key: "288821489515297",
-                    api_secret: "u6ud3EKR6A8BWCxVZfMdNUCTxdc", // Click 'View Credentials' below to copy your API secret
+                const uniqueNumber = Date.now();
+                findRecord.meetingUrl = json.video_url;
+                findRecord.videoUrl = `record-${uniqueNumber}`;
+                await findRecord.save();
+                console.log("Record Saved");
+                cloudinary.config({
+                  cloud_name: "dbthjxcj7",
+                  api_key: "288821489515297",
+                  api_secret: "u6ud3EKR6A8BWCxVZfMdNUCTxdc", // Click 'View Credentials' below to copy your API secret
+                });
+                // Upload an image
+                const uploadResult = await cloudinary.uploader
+                  .upload(json.video_url, {
+                    asset_folder: "records",
+                    resource_type: "video",
+                    public_id: `record-${uniqueNumber}`,
+                  })
+                  .catch((error) => {
+                    console.log(error);
                   });
-                  // Upload an image
-                  const uploadResult = await cloudinary.uploader
-                    .upload(videoUrl, {
-                      asset_folder: "records",
-                      resource_type: "video",
-                      public_id: `record-${uniqueNumber}`,
-                    })
-                    .catch((error) => {
-                      console.log(error);
-                    });
-                }
 
                 res.status(200).json({ message: "Record Saved" });
               }
