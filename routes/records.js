@@ -35,27 +35,36 @@ router.get("/getbot", fetchuser, async (req, res) => {
 router.get("/getRecords", fetchuser, async (req, res) => {
   console.log("---------");
   const userId = req.user.id;
-  const publicFolders = await Folder.find({ accessType: "public" });
-  console.log(publicFolders);
+  const user = await User.findById(userId);
+  // const publicFolders = await Folder.find({ accessType: "public" });
+  // console.log(publicFolders);
 
   const recordQuery = await Record.find({
     $or: [
       { user: userId }, // Records belonging to the logged-in user
       {
-        $and: [
-          {
-            folder: {
-              $in: await Folder.find({
-                accessType: "public",
-              }),
-            },
-            user: {
-              $in: await User.find({
-                companyId: userId,
-              }),
-            },
-          }, // Folder type is public and belongs to the company
-        ],
+        folder: {
+          $in: await Folder.find({
+            accessType: "public",
+          }),
+        },
+        user: {
+          $in: await User.find({
+            companyId: userId,
+          }),
+        },
+      },
+      {
+        folder: {
+          $in: await Folder.find({
+            accessType: "public",
+          }),
+        },
+        user: {
+          $in: await User.find({
+            _id: user.companyId,
+          }),
+        },
       },
     ],
   })
