@@ -278,12 +278,12 @@ router.post("/webhooks", async (req, res) => {
                 findRecord.status = "Completed";
                 findRecord.videoUrl = `record-${uniqueNumber}`;
                 await findRecord.save();
-                const recordStatus = new RecordStatus({
+                const recordCompleted = new RecordStatus({
                   user: findRecord.user,
                   recordId: findRecord._id,
                   status: "Completed",
                 });
-                await recordStatus.save();
+                await recordCompleted.save();
                 console.log("Record Saved");
                 cloudinary.config({
                   cloud_name: "dbthjxcj7",
