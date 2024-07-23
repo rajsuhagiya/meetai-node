@@ -171,6 +171,21 @@ router.post("/raj", async (req, res) => {
   console.log(uploadResult);
 });
 
+router.delete("/deleteRecord/:id", fetchuser, async (req, res) => {
+  try {
+    console.log(req.params.id);
+    let record = await Record.findOne({ _id: req.params.id });
+    console.log(record);
+    if (!record) {
+      return res.status(404).json({ error: "Not Found" });
+    }
+    record = await Record.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: "Record Deleted Successfully", record });
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 router.post("/webhooks", async (req, res) => {
   try {
     console.log(req.body.event, "-----------event");
@@ -186,9 +201,9 @@ router.post("/webhooks", async (req, res) => {
           botId: req.body.data.bot_id,
         });
         if (findRecord) {
-          findRecord.status = req.body.data.status.code;
-          await findRecord.save();
-          console.log("Record updated successfully:", findRecord);
+          // findRecord.status = req.body.data.status.code;
+          // await findRecord.save();
+          // console.log("Record updated successfully:", findRecord);
           const url = `https://${Recall}/api/v1/bot/${bot_id}/`;
           const options = {
             method: "GET",
@@ -204,6 +219,7 @@ router.post("/webhooks", async (req, res) => {
               console.log(json, "bot_get_data");
               if (json.video_url) {
                 const uniqueNumber = Date.now();
+                findRecord.status = "Completed";
                 findRecord.videoUrl = `record-${uniqueNumber}`;
                 await findRecord.save();
                 console.log("Record Saved");
