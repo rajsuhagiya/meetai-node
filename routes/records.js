@@ -270,8 +270,6 @@ router.post("/webhooks", async (req, res) => {
               console.log(json, "bot_get_data");
               if (json.meeting_url && json.meeting_url.platform) {
                 findRecord.platform = json.meeting_url.platform;
-                findRecord.save();
-                console.log("Platform Saved");
               }
               if (json.video_url) {
                 const uniqueNumber = Date.now();
