@@ -21,6 +21,10 @@ const RecordsSchema = new Schema({
   botId: {
     type: String,
   },
+  action: {
+    type: String,
+    required: true,
+  },
   bot: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Setting",

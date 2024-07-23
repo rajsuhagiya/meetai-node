@@ -130,6 +130,7 @@ router.post(
                 botId: json.id, //bot-id for webhook
                 folder: folder,
                 user: req.user.id,
+                action: userId,
               });
               const savedRecord = await record.save();
               res.send(savedRecord);
