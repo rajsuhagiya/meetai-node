@@ -29,6 +29,22 @@ const RecordsSchema = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Folder",
   },
+  platform: {
+    type: String,
+    default: "null",
+  },
+  transcript: {
+    type: String,
+    default: "null",
+  },
+  notes: {
+    type: String,
+    default: "null",
+  },
+  summary: {
+    type: String,
+    default: "null",
+  },
   status: {
     type: String,
     default: "pending",

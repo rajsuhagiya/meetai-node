@@ -180,6 +180,42 @@ router.post("/raj", async (req, res) => {
   console.log(uploadResult);
 });
 
+router.get("/trans", async (req, res) => {
+  const bot_id = "1355d704-0179-41c6-9036-92a54dc2ebe6";
+  //get transcibe
+  const transcriptUrl = `https://${Recall}/api/v1/bot/${bot_id}/transcript`;
+  const transcriptOptions = {
+    method: "GET",
+    headers: {
+      accept: "application/json",
+      Authorization: APIKEY,
+    },
+  };
+
+  fetch(transcriptUrl, transcriptOptions)
+    .then((response) => response.json())
+    .then(async (json) => {
+      console.log(json, "get_tanscript_3");
+      let text = "";
+      if (json.length > 0) {
+        text = json
+          .map((entry) => {
+            const speakerText = entry.words.map((word) => word.text).join(" ");
+            return `${entry.speaker}: ${speakerText}`;
+          })
+          .join("\n");
+      }
+
+      // Return both the JSON and the formatted text
+      res.status(200).json({ json, text });
+    })
+    .catch((err) => {
+      console.error("Error fetching bot data:", err);
+      res.status(500).json({ error: "Error fetching bot data" });
+    });
+  //end transcrbe
+});
+
 router.delete("/deleteRecord/:id", fetchuser, async (req, res) => {
   try {
     console.log(req.params.id);
@@ -232,6 +268,11 @@ router.post("/webhooks", async (req, res) => {
             .then((response) => response.json())
             .then(async (json) => {
               console.log(json, "bot_get_data");
+              if (json.meeting_url && json.meeting_url.platform) {
+                findRecord.platform = json.meeting_url.platform;
+                findRecord.save();
+                console.log("Platform Saved");
+              }
               if (json.video_url) {
                 const uniqueNumber = Date.now();
                 findRecord.status = "Completed";
@@ -267,6 +308,41 @@ router.post("/webhooks", async (req, res) => {
               console.error("Error fetching bot data:", err);
               res.status(500).json({ error: "Error fetching bot data" });
             });
+
+          //get transcibe
+          const transcriptUrl = `https://${Recall}/api/v1/bot/${bot_id}/transcript`;
+          const transcriptOptions = {
+            method: "GET",
+            headers: {
+              accept: "application/json",
+              Authorization: APIKEY,
+            },
+          };
+
+          fetch(transcriptUrl, transcriptOptions)
+            .then((response) => response.json())
+            .then(async (json) => {
+              console.log(json, "get_tanscript");
+              let text = "";
+              if (json.length > 0) {
+                text = json
+                  .map((entry) => {
+                    const speakerText = entry.words
+                      .map((word) => word.text)
+                      .join(" ");
+                    return `${entry.speaker}: ${speakerText}`;
+                  })
+                  .join("\n");
+                findRecord.transcript = text;
+                findRecord.save();
+                console.log("Transcipt Saved");
+              }
+            })
+            .catch((err) => {
+              console.error("Error fetching bot data:", err);
+              res.status(500).json({ error: "Error fetching bot data" });
+            });
+          //end transcrbe
         }
       }
     }, 60);
