@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Record = require("../models/Record");
 const RecordDetails = require("../models/RecordDetails");
+const RecordStatus = require("../models/RecordStatus");
 const Setting = require("../models/Setting");
 const User = require("../models/User");
 const Folder = require("../models/Folder");
@@ -80,6 +81,7 @@ router.get("/getRecords", fetchuser, async (req, res) => {
     date: format(record.joinAt, "MM-dd-yyyy"),
     time: format(record.joinAt, "HH:mm:ss"),
     folder: record.folder.folderName,
+    action: record.user._id == userId ? true : false,
   }));
   res.status(200).json({ recordQuery, records });
 });
@@ -130,9 +132,15 @@ router.post(
                 botId: json.id, //bot-id for webhook
                 folder: folder,
                 user: req.user.id,
-                action: userId,
               });
               const savedRecord = await record.save();
+              if (savedRecord) {
+                const recordStatus = new RecordStatus({
+                  user: req.user.id,
+                  recordId: record._id,
+                });
+                await recordStatus.save();
+              }
               res.send(savedRecord);
             }
           })
@@ -202,6 +210,12 @@ router.post("/webhooks", async (req, res) => {
           botId: req.body.data.bot_id,
         });
         if (findRecord) {
+          const recordStatus = new RecordStatus({
+            user: findRecord.user,
+            recordId: findRecord._id,
+            status: "Processing",
+          });
+          await recordStatus.save();
           // findRecord.status = req.body.data.status.code;
           // await findRecord.save();
           // console.log("Record updated successfully:", findRecord);
@@ -223,6 +237,12 @@ router.post("/webhooks", async (req, res) => {
                 findRecord.status = "Completed";
                 findRecord.videoUrl = `record-${uniqueNumber}`;
                 await findRecord.save();
+                const recordStatus = new RecordStatus({
+                  user: findRecord.user,
+                  recordId: findRecord._id,
+                  status: "Completed",
+                });
+                await recordStatus.save();
                 console.log("Record Saved");
                 cloudinary.config({
                   cloud_name: "dbthjxcj7",
