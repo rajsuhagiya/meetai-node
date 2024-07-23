@@ -90,6 +90,11 @@ router.post(
         });
         // .json({ error: "email and password is incorrect" });
       }
+      if (user.status === "inactive") {
+        return res.status(403).json({
+          error: "Your account has been locked by the administrator.",
+        });
+      }
       const passwordCompare = bcrypt.compareSync(password, user.password);
       if (!passwordCompare) {
         return res
@@ -337,5 +342,42 @@ router.put(
     }
   }
 );
+
+router.put("/change-status", fetchuser, async (req, res) => {
+  try {
+    // const { name, email, password } = req.body;
+    console.log(req.body);
+    const findUser = await User.findById(req.body.id);
+    if (findUser) {
+      if (findUser.status == "active") {
+        findUser.status = "inactive";
+      } else {
+        findUser.status = "active";
+      }
+      findUser.save();
+    }
+    // if (!findUser) {
+    //   return res.status(404).json({ error: "User Not Found" });
+    // }
+
+    // if (email !== findUser.email) {
+    //   const existingUser = await User.findOne({ email });
+    //   if (existingUser) {
+    //     return res
+    //       .status(400)
+    //       .json({ error: "User with this email already exists" });
+    //   }
+    // }
+
+    // findUser.name = name;
+    // findUser.email = email;
+    // await findUser.save();
+    res
+      .status(200)
+      .json({ message: "User Status Updated Successfully", findUser });
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 module.exports = router;

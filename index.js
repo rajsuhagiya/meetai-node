@@ -13,6 +13,7 @@ app.use(express.json());
 //Available Routes
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/records", require("./routes/records"));
+app.use("/api/records-details", require("./routes/recordDetails"));
 app.use("/api/folders", require("./routes/folders"));
 app.use("/api/setting", require("./routes/setting"));
 app.use("/api/dashboard", require("./routes/dashboard"));

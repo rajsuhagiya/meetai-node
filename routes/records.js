@@ -72,6 +72,7 @@ router.get("/getRecords", fetchuser, async (req, res) => {
     .populate("user", "companyId");
   console.log(recordQuery);
   const records = recordQuery.map((record) => ({
+    id: record._id,
     name: record.meetingName,
     type: record.folder.accessType,
     record: record.videoUrl,
