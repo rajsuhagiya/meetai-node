@@ -228,19 +228,20 @@ router.post("/webhooks", async (req, res) => {
   try {
     // setTimeout(async () => {
     let bot_id = req.body.data.bot_id;
+
     console.log("print body -----------------", req.body);
     if (req.body.data.status.code === "call_ended") {
       const findRecord = await Record.findOne({
         botId: req.body.data.bot_id,
       });
       if (findRecord) {
-        const recordStatus = new RecordStatus({
-          user: findRecord.user,
-          recordId: findRecord._id,
-          status: "Processing",
-        });
+        // const recordStatus = new RecordStatus({
+        //   user: findRecord.user,
+        //   recordId: findRecord._id,
+        //   status: "Processing",
+        // });
         console.log("Processing --------------------------------------");
-        await recordStatus.save();
+        // await recordStatus.save();
         // findRecord.status = req.body.data.status.code;
         // await findRecord.save();
 
@@ -264,12 +265,12 @@ router.post("/webhooks", async (req, res) => {
               findRecord.status = "Completed";
               findRecord.videoUrl = `record-${uniqueNumber}`;
               await findRecord.save();
-              const recordCompleted = new RecordStatus({
-                user: findRecord.user,
-                recordId: findRecord._id,
-                status: "Completed",
-              });
-              await recordCompleted.save();
+              // const recordCompleted = new RecordStatus({
+              //   user: findRecord.user,
+              //   recordId: findRecord._id,
+              //   status: "Completed",
+              // });
+              // await recordCompleted.save();
 
               cloudinary.config({
                 cloud_name: "dbthjxcj7",
