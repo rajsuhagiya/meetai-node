@@ -286,6 +286,7 @@ router.post("/webhooks", async (req, res) => {
                   .join(" ");
 
                 console.log(formattedDuration, "duration");
+                findRecord.duration = formattedDuration;
               }
               await findRecord.save();
               const recordCompleted = new RecordStatus({

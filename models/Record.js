@@ -45,6 +45,10 @@ const RecordsSchema = new Schema({
     type: String,
     default: "null",
   },
+  duration: {
+    type: String,
+    default: "null",
+  },
   status: {
     type: String,
     default: "pending",
