@@ -71,7 +71,6 @@ router.get("/getRecords", fetchuser, async (req, res) => {
   })
     .populate("folder", "folderName accessType")
     .populate("user", "companyId");
-  console.log(recordQuery);
   const records = recordQuery.map((record) => ({
     id: record._id,
     name: record.meetingName,
@@ -125,7 +124,6 @@ router.post(
         const result = fetch(url, options)
           .then((res) => res.json())
           .then(async (json) => {
-            // console.log(json, "ffffffffff");
             if (json.id) {
               const record = new Record({
                 meetingName,
