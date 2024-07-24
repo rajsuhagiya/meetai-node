@@ -30,6 +30,10 @@ router.get("/get-record-details/:id", fetchuser, async (req, res) => {
     date: format(record.joinAt, "MM-dd-yyyy"),
     time: format(record.joinAt, "HH:mm:ss"),
     folder: record.folder.folderName,
+    transcript: record.transcript,
+    platform: record.platform,
+    notes: record.notes,
+    summary: record.summary,
   };
   res.status(200).json({
     success: "Record Details Fetched Successfully",
