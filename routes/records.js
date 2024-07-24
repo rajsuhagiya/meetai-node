@@ -268,7 +268,6 @@ router.post("/webhooks", async (req, res) => {
                 findRecord.platform = json.meeting_url.platform;
               }
               if (json.video_url) {
-                console.log(json);
                 const uniqueNumber = Date.now();
                 findRecord.status = "Completed";
                 findRecord.videoUrl = `record-${uniqueNumber}`;
@@ -279,7 +278,7 @@ router.post("/webhooks", async (req, res) => {
                 //   status: "Completed",
                 // });
                 // await recordCompleted.save();
-                console.log("Record Saved");
+                console.log("Record Saved ---");
                 cloudinary.config({
                   cloud_name: "dbthjxcj7",
                   api_key: "288821489515297",
@@ -305,38 +304,38 @@ router.post("/webhooks", async (req, res) => {
             });
 
           //get transcibe
-          const transcriptUrl = `https://${Recall}/api/v1/bot/${bot_id}/transcript`;
-          const transcriptOptions = {
-            method: "GET",
-            headers: {
-              accept: "application/json",
-              Authorization: APIKEY,
-            },
-          };
+          // const transcriptUrl = `https://${Recall}/api/v1/bot/${bot_id}/transcript`;
+          // const transcriptOptions = {
+          //   method: "GET",
+          //   headers: {
+          //     accept: "application/json",
+          //     Authorization: APIKEY,
+          //   },
+          // };
 
-          fetch(transcriptUrl, transcriptOptions)
-            .then((response) => response.json())
-            .then(async (json) => {
-              console.log(json, "get_tanscript");
-              let text = "";
-              if (json.length > 0) {
-                text = json
-                  .map((entry) => {
-                    const speakerText = entry.words
-                      .map((word) => word.text)
-                      .join(" ");
-                    return `${entry.speaker}: ${speakerText}`;
-                  })
-                  .join("\n");
-                findRecord.transcript = text;
-                findRecord.save();
-                console.log("Transcipt Saved");
-              }
-            })
-            .catch((err) => {
-              console.error("Error fetching bot data:", err);
-              res.status(500).json({ error: "Error fetching bot data" });
-            });
+          // fetch(transcriptUrl, transcriptOptions)
+          //   .then((response) => response.json())
+          //   .then(async (json) => {
+          //     console.log(json, "get_tanscript");
+          //     let text = "";
+          //     if (json.length > 0) {
+          //       text = json
+          //         .map((entry) => {
+          //           const speakerText = entry.words
+          //             .map((word) => word.text)
+          //             .join(" ");
+          //           return `${entry.speaker}: ${speakerText}`;
+          //         })
+          //         .join("\n");
+          //       findRecord.transcript = text;
+          //       findRecord.save();
+          //       console.log("Transcipt Saved");
+          //     }
+          //   })
+          //   .catch((err) => {
+          //     console.error("Error fetching bot data:", err);
+          //     res.status(500).json({ error: "Error fetching bot data" });
+          //   });
           //end transcrbe
         }
       }
