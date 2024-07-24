@@ -38,7 +38,6 @@ router.get("/getfolders", fetchuser, async (req, res) => {
   // try {
   user_id = req.user.id;
   const user = await User.findById(user_id);
-  console.log(user);
 
   const foldersQuery = await Folder.find({
     $or: [
@@ -64,7 +63,6 @@ router.get("/getfolders", fetchuser, async (req, res) => {
     })
   );
 
-  console.log(folders, "fol");
   res.send(folders);
   // } catch (error) {
   //   res.status(500).json({ error: "Internal Server Error" });

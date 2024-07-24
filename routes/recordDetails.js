@@ -14,7 +14,6 @@ router.get("/get-record-details/:id", fetchuser, async (req, res) => {
     .populate("folder", "folderName accessType")
     .populate("user", "companyId");
 
-  console.log(record, "iddd");
   // userId = req.user.id;
   // const folder = await Folder.create({
   //   folderName: req.body.folderName,

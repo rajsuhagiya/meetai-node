@@ -42,7 +42,6 @@ router.post(
         type: "company",
       });
 
-      console.log("User created successfully:", user);
       if (user) {
         await Setting.create({
           botName: user.name + `'s Bot`,
@@ -142,7 +141,6 @@ router.put(
       // if (!errors.isEmpty()) {
       //   return res.status(400).json({ errors: errors.array() });
       // }
-      // console.log(req.body);
       const { name, email, mobileNumber } = req.body;
       const editUser = {};
       if (name) {
@@ -186,7 +184,6 @@ router.put(
 router.post("/addUser", fetchuser, async (req, res) => {
   // try {
   const { name, email, password } = req.body;
-  // console.log(req.body);
   let user = await User.findOne({ email });
   if (user) {
     return res
@@ -194,9 +191,7 @@ router.post("/addUser", fetchuser, async (req, res) => {
       .json({ error: "User with this email is alredy exists" });
   }
   const salt = bcrypt.genSaltSync(10);
-  console.log(req.body);
   secPass = bcrypt.hashSync(password, salt);
-  console.log("hee");
   user = await User.create({
     name: name,
     email: email,
@@ -204,8 +199,6 @@ router.post("/addUser", fetchuser, async (req, res) => {
     companyId: req.user.id,
     type: "individual",
   });
-  console.log(user);
-  console.log("User created successfully:", user);
   if (user) {
     await Setting.create({
       botName: user.name + `'s Bot`,
@@ -224,9 +217,7 @@ router.post("/addUser", fetchuser, async (req, res) => {
 
 router.delete("/deleteUser/:id", fetchuser, async (req, res) => {
   try {
-    console.log(req.params.id);
     let user = await User.findOne({ _id: req.params.id });
-    console.log(user);
     if (!user) {
       return res.status(404).json({ error: "Not Found" });
     }
@@ -346,7 +337,6 @@ router.put(
 router.put("/change-status", fetchuser, async (req, res) => {
   try {
     // const { name, email, password } = req.body;
-    console.log(req.body);
     const findUser = await User.findById(req.body.id);
     if (findUser) {
       if (findUser.status == "active") {

@@ -13,7 +13,6 @@ router.post("/getsetting", fetchuser, async (req, res) => {
       botName: setting?.botName || "",
       _id: setting?._id || "",
     };
-    // console.log(data, "???");
     // if (!setting) {
     //   return res.status(404).json({ error: "Setting not found", response });
     // }
@@ -47,7 +46,6 @@ router.post("/updatesetting", fetchuser, async (req, res) => {
       });
     }
 
-    console.log(setting);
     res
       .status(200)
       .json({ success: "Setting Updated Successfully", status: 200, setting });
