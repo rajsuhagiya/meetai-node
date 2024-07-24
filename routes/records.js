@@ -235,7 +235,7 @@ router.delete("/deleteRecord/:id", fetchuser, async (req, res) => {
 
 router.post("/webhooks", async (req, res) => {
   try {
-    // console.log(req.body.data.status.code, "-----------call_ended");
+    console.log(req.body.data.status.code, "-----------call_ended");
     // setTimeout(async () => {
     let bot_id = req.body.data.bot_id;
     if (req.body.data.status.code === "call_ended") {
