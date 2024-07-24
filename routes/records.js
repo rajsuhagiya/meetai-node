@@ -226,111 +226,111 @@ router.delete("/deleteRecord/:id", fetchuser, async (req, res) => {
 
 router.post("/webhooks", async (req, res) => {
   try {
-    setTimeout(async () => {
-      let bot_id = req.body.data.bot_id;
-      console.log("print body -----------------", req.body);
-      if (
-        req.body.event === "done" ||
-        req.body.data.status.code === "call_ended"
-      ) {
-        const findRecord = await Record.findOne({
-          botId: req.body.data.bot_id,
+    // setTimeout(async () => {
+    let bot_id = req.body.data.bot_id;
+    console.log("print body -----------------", req.body);
+    if (
+      req.body.event === "done" ||
+      req.body.data.status.code === "call_ended"
+    ) {
+      const findRecord = await Record.findOne({
+        botId: req.body.data.bot_id,
+      });
+      if (findRecord) {
+        const recordStatus = new RecordStatus({
+          user: findRecord.user,
+          recordId: findRecord._id,
+          status: "Processing",
         });
-        if (findRecord) {
-          const recordStatus = new RecordStatus({
-            user: findRecord.user,
-            recordId: findRecord._id,
-            status: "Processing",
+        console.log("Processing --------------------------------------");
+        await recordStatus.save();
+        // findRecord.status = req.body.data.status.code;
+        // await findRecord.save();
+
+        const url = `https://${Recall}/api/v1/bot/${bot_id}/`;
+        const options = {
+          method: "GET",
+          headers: {
+            accept: "application/json",
+            Authorization: APIKEY,
+          },
+        };
+
+        fetch(url, options)
+          .then((response) => response.json())
+          .then(async (json) => {
+            if (json.meeting_url && json.meeting_url.platform) {
+              findRecord.platform = json.meeting_url.platform;
+            }
+            if (json.video_url) {
+              const uniqueNumber = Date.now();
+              findRecord.status = "Completed";
+              findRecord.videoUrl = `record-${uniqueNumber}`;
+              // await findRecord.save();
+              const recordCompleted = new RecordStatus({
+                user: findRecord.user,
+                recordId: findRecord._id,
+                status: "Completed",
+              });
+              await recordCompleted.save();
+
+              cloudinary.config({
+                cloud_name: "dbthjxcj7",
+                api_key: "288821489515297",
+                api_secret: "u6ud3EKR6A8BWCxVZfMdNUCTxdc", // Click 'View Credentials' below to copy your API secret
+              });
+              // Upload an image
+              const uploadResult = await cloudinary.uploader
+                .upload(json.video_url, {
+                  asset_folder: "records",
+                  resource_type: "video",
+                  public_id: `record-${uniqueNumber}`,
+                })
+                .catch((error) => {});
+
+              res.status(200).json({ message: "Record Saved" });
+            }
+          })
+          .catch((err) => {
+            console.error("Error fetching bot data:", err);
+            res.status(500).json({ error: "Error fetching bot data" });
           });
-          console.log("Processing --------------------------------------");
-          await recordStatus.save();
-          // findRecord.status = req.body.data.status.code;
-          // await findRecord.save();
 
-          const url = `https://${Recall}/api/v1/bot/${bot_id}/`;
-          const options = {
-            method: "GET",
-            headers: {
-              accept: "application/json",
-              Authorization: APIKEY,
-            },
-          };
+        //get transcibe
+        const transcriptUrl = `https://${Recall}/api/v1/bot/${bot_id}/transcript`;
+        const transcriptOptions = {
+          method: "GET",
+          headers: {
+            accept: "application/json",
+            Authorization: APIKEY,
+          },
+        };
 
-          fetch(url, options)
-            .then((response) => response.json())
-            .then(async (json) => {
-              if (json.meeting_url && json.meeting_url.platform) {
-                findRecord.platform = json.meeting_url.platform;
-              }
-              if (json.video_url) {
-                const uniqueNumber = Date.now();
-                findRecord.status = "Completed";
-                findRecord.videoUrl = `record-${uniqueNumber}`;
-                // await findRecord.save();
-                const recordCompleted = new RecordStatus({
-                  user: findRecord.user,
-                  recordId: findRecord._id,
-                  status: "Completed",
-                });
-                await recordCompleted.save();
-
-                cloudinary.config({
-                  cloud_name: "dbthjxcj7",
-                  api_key: "288821489515297",
-                  api_secret: "u6ud3EKR6A8BWCxVZfMdNUCTxdc", // Click 'View Credentials' below to copy your API secret
-                });
-                // Upload an image
-                const uploadResult = await cloudinary.uploader
-                  .upload(json.video_url, {
-                    asset_folder: "records",
-                    resource_type: "video",
-                    public_id: `record-${uniqueNumber}`,
-                  })
-                  .catch((error) => {});
-
-                res.status(200).json({ message: "Record Saved" });
-              }
-            })
-            .catch((err) => {
-              console.error("Error fetching bot data:", err);
-              res.status(500).json({ error: "Error fetching bot data" });
-            });
-
-          //get transcibe
-          const transcriptUrl = `https://${Recall}/api/v1/bot/${bot_id}/transcript`;
-          const transcriptOptions = {
-            method: "GET",
-            headers: {
-              accept: "application/json",
-              Authorization: APIKEY,
-            },
-          };
-
-          fetch(transcriptUrl, transcriptOptions)
-            .then((response) => response.json())
-            .then(async (json) => {
-              let text = "";
-              if (json.length > 0) {
-                text = json
-                  .map((entry) => {
-                    const speakerText = entry.words
-                      .map((word) => word.text)
-                      .join(" ");
-                    return `${entry.speaker}: ${speakerText}`;
-                  })
-                  .join("\n");
-                findRecord.transcript = text;
-                findRecord.save();
-              }
-            })
-            .catch((err) => {
-              console.error("Error fetching bot data:", err);
-              res.status(500).json({ error: "Error fetching bot data" });
-            });
-          //end transcrbe
-        }
+        fetch(transcriptUrl, transcriptOptions)
+          .then((response) => response.json())
+          .then(async (json) => {
+            let text = "";
+            if (json.length > 0) {
+              text = json
+                .map((entry) => {
+                  const speakerText = entry.words
+                    .map((word) => word.text)
+                    .join(" ");
+                  return `${entry.speaker}: ${speakerText}`;
+                })
+                .join("\n");
+              findRecord.transcript = text;
+              findRecord.save();
+            }
+          })
+          .catch((err) => {
+            console.error("Error fetching bot data:", err);
+            res.status(500).json({ error: "Error fetching bot data" });
+          });
+        //end transcrbe
       }
-    }, 60);
+    }
+    // }, 60);
   } catch (e) {
     res.status(500).json({ error: "Internal Server Error" });
   }
