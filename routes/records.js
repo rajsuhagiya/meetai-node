@@ -279,7 +279,7 @@ router.post("/webhooks", async (req, res) => {
               const uniqueNumber = Date.now();
               findRecord.status = "Completed";
               findRecord.videoUrl = `record-${uniqueNumber}`;
-              await findRecord.save();
+              // await findRecord.save();
               const recordCompleted = new RecordStatus({
                 user: findRecord.user,
                 recordId: findRecord._id,
@@ -339,7 +339,7 @@ router.post("/webhooks", async (req, res) => {
 
               console.log("Transcipt Saved");
             }
-            await findRecord.save();
+            // await findRecord.save();
           })
           .catch((err) => {
             console.error("Error fetching bot data:", err);
@@ -348,6 +348,7 @@ router.post("/webhooks", async (req, res) => {
 
         //end transcrbe
       }
+      await findRecord.save();
     }
     // }, 60);
   } catch (e) {
