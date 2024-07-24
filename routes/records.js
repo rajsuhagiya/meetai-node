@@ -229,10 +229,7 @@ router.post("/webhooks", async (req, res) => {
     // setTimeout(async () => {
     let bot_id = req.body.data.bot_id;
     console.log("print body -----------------", req.body);
-    if (
-      req.body.event === "done" ||
-      req.body.data.status.code === "call_ended"
-    ) {
+    if (req.body.data.status.code === "call_ended") {
       const findRecord = await Record.findOne({
         botId: req.body.data.bot_id,
       });
@@ -266,7 +263,7 @@ router.post("/webhooks", async (req, res) => {
               const uniqueNumber = Date.now();
               findRecord.status = "Completed";
               findRecord.videoUrl = `record-${uniqueNumber}`;
-              // await findRecord.save();
+              await findRecord.save();
               const recordCompleted = new RecordStatus({
                 user: findRecord.user,
                 recordId: findRecord._id,
@@ -287,13 +284,7 @@ router.post("/webhooks", async (req, res) => {
                   public_id: `record-${uniqueNumber}`,
                 })
                 .catch((error) => {});
-
-              res.status(200).json({ message: "Record Saved" });
             }
-          })
-          .catch((err) => {
-            console.error("Error fetching bot data:", err);
-            res.status(500).json({ error: "Error fetching bot data" });
           });
 
         //get transcibe
@@ -322,11 +313,9 @@ router.post("/webhooks", async (req, res) => {
               findRecord.transcript = text;
               findRecord.save();
             }
-          })
-          .catch((err) => {
-            console.error("Error fetching bot data:", err);
-            res.status(500).json({ error: "Error fetching bot data" });
           });
+        res.status(200).json({ message: "Record Saved" });
+
         //end transcrbe
       }
     }
