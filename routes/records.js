@@ -242,12 +242,12 @@ router.post("/webhooks", async (req, res) => {
         botId: req.body.data.bot_id,
       });
       if (findRecord) {
-        // const recordStatus = new RecordStatus({
-        //   user: findRecord.user,
-        //   recordId: findRecord._id,
-        //   status: "Processing",
-        // });
-        // await recordStatus.save();
+        const recordStatus = new RecordStatus({
+          user: findRecord.user,
+          recordId: findRecord._id,
+          status: "Processing",
+        });
+        await recordStatus.save();
         // findRecord.status = req.body.data.status.code;
         // await findRecord.save();
         // console.log("Record updated successfully:", findRecord);
@@ -273,12 +273,12 @@ router.post("/webhooks", async (req, res) => {
               findRecord.status = "Completed";
               findRecord.videoUrl = `record-${uniqueNumber}`;
               await findRecord.save();
-              // const recordCompleted = new RecordStatus({
-              //   user: findRecord.user,
-              //   recordId: findRecord._id,
-              //   status: "Completed",
-              // });
-              // await recordCompleted.save();
+              const recordCompleted = new RecordStatus({
+                user: findRecord.user,
+                recordId: findRecord._id,
+                status: "Completed",
+              });
+              await recordCompleted.save();
               console.log("Record Saved ---");
               cloudinary.config({
                 cloud_name: "dbthjxcj7",
