@@ -6,6 +6,7 @@ const mongoURL =
 
 const connectToMongo = () => {
   mongoose.connect(mongoURL, {
+    useNewUrlParser: true,
     useUnifiedTopology: true,
   });
   console.log("connected to mongoose");

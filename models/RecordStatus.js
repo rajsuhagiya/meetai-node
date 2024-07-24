@@ -12,7 +12,7 @@ const RecordStatusSchema = new Schema({
   },
   status: {
     type: String,
-    default: "pending",
+    default: "Pending",
   },
   createdAt: {
     type: Date,

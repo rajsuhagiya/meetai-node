@@ -181,39 +181,20 @@ router.post("/raj", async (req, res) => {
 });
 
 router.get("/trans", async (req, res) => {
-  const bot_id = "1355d704-0179-41c6-9036-92a54dc2ebe6";
-  //get transcibe
-  const transcriptUrl = `https://${Recall}/api/v1/bot/${bot_id}/transcript`;
-  const transcriptOptions = {
-    method: "GET",
-    headers: {
-      accept: "application/json",
-      Authorization: APIKEY,
-    },
-  };
-
-  fetch(transcriptUrl, transcriptOptions)
-    .then((response) => response.json())
-    .then(async (json) => {
-      console.log(json, "get_tanscript_3");
-      let text = "";
-      if (json.length > 0) {
-        text = json
-          .map((entry) => {
-            const speakerText = entry.words.map((word) => word.text).join(" ");
-            return `${entry.speaker}: ${speakerText}`;
-          })
-          .join("\n");
-      }
-
-      // Return both the JSON and the formatted text
-      res.status(200).json({ json, text });
-    })
-    .catch((err) => {
-      console.error("Error fetching bot data:", err);
-      res.status(500).json({ error: "Error fetching bot data" });
-    });
-  //end transcrbe
+  // const findRecordStatus = await RecordStatus.findOne({
+  //   user: "66883dd7c13e6c08bd7a3a35",
+  //   recordId: "66a1104fd6ac25dae545673c",
+  //   status: "pending",
+  // });
+  if (!findRecordStatus) {
+    // const recordStatus = new RecordStatus({
+    //   user: "66883dd7c13e6c08bd7a3a35",
+    //   recordId: "66a1104fd6ac25dae545673c",
+    //   status: "Processing",
+    // });
+    // await recordStatus.save();
+  }
+  res.status(200).json({ findRecordStatus });
 });
 
 router.delete("/deleteRecord/:id", fetchuser, async (req, res) => {
@@ -242,7 +223,7 @@ router.post("/webhooks", async (req, res) => {
         botId: req.body.data.bot_id,
       });
       if (findRecord) {
-        const findRecordStatus = RecordStatus.findOne({
+        const findRecordStatus = await RecordStatus.findOne({
           user: findRecord.user,
           recordId: findRecord._id,
           status: "Processing",
@@ -279,7 +260,7 @@ router.post("/webhooks", async (req, res) => {
               const uniqueNumber = Date.now();
               findRecord.status = "Completed";
               findRecord.videoUrl = `record-${uniqueNumber}`;
-              // await findRecord.save();
+              await findRecord.save();
               const recordCompleted = new RecordStatus({
                 user: findRecord.user,
                 recordId: findRecord._id,
@@ -339,7 +320,7 @@ router.post("/webhooks", async (req, res) => {
 
               console.log("Transcipt Saved");
             }
-            // await findRecord.save();
+            await findRecord.save();
           })
           .catch((err) => {
             console.error("Error fetching bot data:", err);
@@ -348,7 +329,8 @@ router.post("/webhooks", async (req, res) => {
 
         //end transcrbe
       }
-      await findRecord.save();
+      // await findRecord.save();
+      console.log("final save", "fffffffffffff");
     }
     // }, 60);
   } catch (e) {
