@@ -260,6 +260,33 @@ router.post("/webhooks", async (req, res) => {
               const uniqueNumber = Date.now();
               findRecord.status = "Completed";
               findRecord.videoUrl = `record-${uniqueNumber}`;
+              if (
+                json.recordings &&
+                Array.isArray(json.recordings) &&
+                json.recordings.length > 0 &&
+                json.recordings[0].started_at &&
+                json.recordings[0].completed_at
+              ) {
+                const { started_at, completed_at } = json.recordings[0];
+                const durationMs =
+                  new Date(completed_at) - new Date(started_at);
+
+                const hours = Math.floor(durationMs / (1000 * 60 * 60));
+                const minutes = Math.floor(
+                  (durationMs % (1000 * 60 * 60)) / (1000 * 60)
+                );
+                const seconds = Math.floor((durationMs % (1000 * 60)) / 1000);
+
+                const formattedDuration = [
+                  hours > 0 ? `${hours}h` : null,
+                  minutes > 0 ? `${minutes}m` : null,
+                  seconds > 0 ? `${seconds}s` : null,
+                ]
+                  .filter(Boolean)
+                  .join(" ");
+
+                console.log(formattedDuration, "duration");
+              }
               await findRecord.save();
               const recordCompleted = new RecordStatus({
                 user: findRecord.user,
