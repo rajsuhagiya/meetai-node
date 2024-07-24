@@ -34,9 +34,11 @@ router.get("/getbot", fetchuser, async (req, res) => {
 });
 
 router.get("/getRecords", fetchuser, async (req, res) => {
+  console.log("---------");
   const userId = req.user.id;
   const user = await User.findById(userId);
   // const publicFolders = await Folder.find({ accessType: "public" });
+  // console.log(publicFolders);
 
   const recordQuery = await Record.find({
     $or: [
@@ -69,7 +71,7 @@ router.get("/getRecords", fetchuser, async (req, res) => {
   })
     .populate("folder", "folderName accessType")
     .populate("user", "companyId");
-
+  console.log(recordQuery);
   const records = recordQuery.map((record) => ({
     id: record._id,
     name: record.meetingName,
@@ -123,6 +125,7 @@ router.post(
         const result = fetch(url, options)
           .then((res) => res.json())
           .then(async (json) => {
+            // console.log(json, "ffffffffff");
             if (json.id) {
               const record = new Record({
                 meetingName,
@@ -172,7 +175,11 @@ router.post("/raj", async (req, res) => {
         public_id: `record-${uniqueNumber}`,
       }
     )
-    .catch((error) => {});
+    .catch((error) => {
+      console.log(error);
+    });
+
+  console.log(uploadResult);
 });
 
 router.get("/trans", async (req, res) => {
@@ -190,6 +197,7 @@ router.get("/trans", async (req, res) => {
   fetch(transcriptUrl, transcriptOptions)
     .then((response) => response.json())
     .then(async (json) => {
+      console.log(json, "get_tanscript_3");
       let text = "";
       if (json.length > 0) {
         text = json
@@ -212,8 +220,9 @@ router.get("/trans", async (req, res) => {
 
 router.delete("/deleteRecord/:id", fetchuser, async (req, res) => {
   try {
+    console.log(req.params.id);
     let record = await Record.findOne({ _id: req.params.id });
-
+    console.log(record);
     if (!record) {
       return res.status(404).json({ error: "Not Found" });
     }
@@ -226,11 +235,11 @@ router.delete("/deleteRecord/:id", fetchuser, async (req, res) => {
 
 router.post("/webhooks", async (req, res) => {
   try {
+    console.log(req.body.data.status.code, "-----------call_ended");
     // setTimeout(async () => {
     let bot_id = req.body.data.bot_id;
-
-    console.log("print body -----------------", req.body);
     if (req.body.data.status.code === "call_ended") {
+      console.log(req.body);
       const findRecord = await Record.findOne({
         botId: req.body.data.bot_id,
       });
@@ -240,11 +249,10 @@ router.post("/webhooks", async (req, res) => {
         //   recordId: findRecord._id,
         //   status: "Processing",
         // });
-        console.log("Processing --------------------------------------");
         // await recordStatus.save();
         // findRecord.status = req.body.data.status.code;
         // await findRecord.save();
-
+        // console.log("Record updated successfully:", findRecord);
         const url = `https://${Recall}/api/v1/bot/${bot_id}/`;
         const options = {
           method: "GET",
@@ -257,6 +265,7 @@ router.post("/webhooks", async (req, res) => {
         fetch(url, options)
           .then((response) => response.json())
           .then(async (json) => {
+            console.log(json, "bot_get_data");
             if (json.meeting_url && json.meeting_url.platform) {
               findRecord.platform = json.meeting_url.platform;
             }
@@ -271,7 +280,7 @@ router.post("/webhooks", async (req, res) => {
               //   status: "Completed",
               // });
               // await recordCompleted.save();
-
+              console.log("Record Saved");
               cloudinary.config({
                 cloud_name: "dbthjxcj7",
                 api_key: "288821489515297",
@@ -284,8 +293,16 @@ router.post("/webhooks", async (req, res) => {
                   resource_type: "video",
                   public_id: `record-${uniqueNumber}`,
                 })
-                .catch((error) => {});
+                .catch((error) => {
+                  console.log(error);
+                });
+
+              res.status(200).json({ message: "Record Saved" });
             }
+          })
+          .catch((err) => {
+            console.error("Error fetching bot data:", err);
+            res.status(500).json({ error: "Error fetching bot data" });
           });
 
         //get transcibe
@@ -301,6 +318,7 @@ router.post("/webhooks", async (req, res) => {
         fetch(transcriptUrl, transcriptOptions)
           .then((response) => response.json())
           .then(async (json) => {
+            console.log(json, "get_tanscript");
             let text = "";
             if (json.length > 0) {
               text = json
@@ -313,10 +331,13 @@ router.post("/webhooks", async (req, res) => {
                 .join("\n");
               findRecord.transcript = text;
               findRecord.save();
+              console.log("Transcipt Saved");
             }
+          })
+          .catch((err) => {
+            console.error("Error fetching bot data:", err);
+            res.status(500).json({ error: "Error fetching bot data" });
           });
-        res.status(200).json({ message: "Record Saved" });
-
         //end transcrbe
       }
     }
