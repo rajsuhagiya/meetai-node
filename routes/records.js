@@ -242,19 +242,19 @@ router.post("/webhooks", async (req, res) => {
         botId: req.body.data.bot_id,
       });
       if (findRecord) {
-        const findRecordStatus = RecordStatus.findOne({
-          user: findRecord.user,
-          recordId: findRecord._id,
-          status: "Processing",
-        });
-        if (!findRecordStatus) {
-          const recordStatus = new RecordStatus({
-            user: findRecord.user,
-            recordId: findRecord._id,
-            status: "Processing",
-          });
-          await recordStatus.save();
-        }
+        // const findRecordStatus = RecordStatus.findOne({
+        //   user: findRecord.user,
+        //   recordId: findRecord._id,
+        //   status: "Processing",
+        // });
+        // if (!findRecordStatus) {
+        //   const recordStatus = new RecordStatus({
+        //     user: findRecord.user,
+        //     recordId: findRecord._id,
+        //     status: "Processing",
+        //   });
+        //   await recordStatus.save();
+        // }
         // findRecord.status = req.body.data.status.code;
         // await findRecord.save();
         // console.log("Record updated successfully:", findRecord);
