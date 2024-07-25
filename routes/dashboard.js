@@ -24,8 +24,8 @@ router.get("/getDashboard", fetchuser, async (req, res) => {
     });
     const yourCalls = await Record.countDocuments({ user: user_id });
     const teamCalls = await Record.countDocuments({
+      user: { $ne: user_id },
       $or: [
-        { user: user_id },
         {
           user: { $in: await User.find({ companyId: user_id }) },
         },
@@ -61,11 +61,11 @@ router.get("/get-tally-chart", fetchuser, async (req, res) => {
   }).populate("user", "name");
 
   const userRecordCountMap = {};
+  users.forEach((user) => {
+    userRecordCountMap[user.name] = 0; // Initialize to 0
+  });
   records.forEach((record) => {
     const userName = record.user.name;
-    if (!userRecordCountMap[userName]) {
-      userRecordCountMap[userName] = 0;
-    }
     userRecordCountMap[userName]++;
   });
 

@@ -182,37 +182,37 @@ router.put(
 );
 
 router.post("/addUser", fetchuser, async (req, res) => {
-  // try {
-  const { name, email, password } = req.body;
-  let user = await User.findOne({ email });
-  if (user) {
-    return res
-      .status(400)
-      .json({ error: "User with this email is alredy exists" });
-  }
-  const salt = bcrypt.genSaltSync(10);
-  secPass = bcrypt.hashSync(password, salt);
-  user = await User.create({
-    name: name,
-    email: email,
-    password: secPass,
-    companyId: req.user.id,
-    type: "individual",
-  });
-  if (user) {
-    await Setting.create({
-      botName: user.name + `'s Bot`,
-      user: user.id,
+  try {
+    const { name, email, password } = req.body;
+    let user = await User.findOne({ email });
+    if (user) {
+      return res
+        .status(400)
+        .json({ error: "User with this email is alredy exists" });
+    }
+    const salt = bcrypt.genSaltSync(10);
+    secPass = bcrypt.hashSync(password, salt);
+    user = await User.create({
+      name: name,
+      email: email,
+      password: secPass,
+      companyId: req.user.id,
+      type: "individual",
     });
+    if (user) {
+      await Setting.create({
+        botName: user.name + `'s Bot`,
+        user: user.id,
+      });
+    }
+    const result = {
+      email: user.email,
+      name: user.name,
+    };
+    res.status(200).json({ result });
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
   }
-  const result = {
-    email: user.email,
-    name: user.name,
-  };
-  res.status(200).json({ result });
-  // } catch (error) {
-  //   res.status(500).json({ error: "Internal Server Error" });
-  // }
 });
 
 router.delete("/deleteUser/:id", fetchuser, async (req, res) => {
