@@ -9,28 +9,65 @@ router.get("/getDashboard", fetchuser, async (req, res) => {
   try {
     user_id = req.user.id;
     const user = await User.findById(user_id);
+    let temp_id = user_id;
+    if (user.companyId) {
+      temp_id = user.companyId;
+    }
     const folderCount = await Folder.countDocuments({
       $or: [
         { user: user_id },
         {
           accessType: "public",
-          user: { $in: await User.find({ companyId: user_id }) },
+          user: { $in: await User.find({ companyId: temp_id }) },
         },
         {
           accessType: "public",
-          user: { $in: await User.find({ _id: user.companyId }) },
+          user: { $in: await User.find({ _id: temp_id }) },
         },
       ],
     });
     const yourCalls = await Record.countDocuments({ user: user_id });
+
     const teamCalls = await Record.countDocuments({
       user: { $ne: user_id },
       $or: [
         {
-          user: { $in: await User.find({ companyId: user_id }) },
+          user: { $in: await User.find({ companyId: temp_id }) },
+          folder: {
+            $in: await Folder.find({
+              accessType: "public",
+            }),
+          },
         },
         {
-          user: { $in: await User.find({ _id: user.companyId }) },
+          user: { $in: await User.find({ _id: temp_id }) },
+          folder: {
+            $in: await Folder.find({
+              accessType: "public",
+            }),
+          },
+        },
+      ],
+    });
+    const failedCalls = await Record.countDocuments({
+      status: "Failed",
+      $or: [
+        { user: user_id },
+        {
+          user: { $in: await User.find({ companyId: temp_id }) },
+          folder: {
+            $in: await Folder.find({
+              accessType: "public",
+            }),
+          },
+        },
+        {
+          user: { $in: await User.find({ _id: temp_id }) },
+          folder: {
+            $in: await Folder.find({
+              accessType: "public",
+            }),
+          },
         },
       ],
     });
@@ -39,7 +76,7 @@ router.get("/getDashboard", fetchuser, async (req, res) => {
       folderCount,
       yourCalls,
       teamCalls,
-      failedCalls: 0,
+      failedCalls,
     });
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });

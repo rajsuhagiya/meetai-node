@@ -38,17 +38,21 @@ router.get("/getfolders", fetchuser, async (req, res) => {
   // try {
   user_id = req.user.id;
   const user = await User.findById(user_id);
+  let temp_id = user_id;
+  if (user.companyId) {
+    temp_id = user.companyId;
+  }
 
   const foldersQuery = await Folder.find({
     $or: [
       { user: user_id },
       {
         accessType: "public",
-        user: { $in: await User.find({ companyId: user_id }) },
+        user: { $in: await User.find({ companyId: temp_id }) },
       },
       {
         accessType: "public",
-        user: { $in: await User.find({ _id: user.companyId }) },
+        user: { $in: await User.find({ _id: temp_id }) },
       },
     ],
   });

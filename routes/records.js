@@ -37,6 +37,10 @@ router.post("/getRecords", fetchuser, async (req, res) => {
   const status = req.body.status;
   const userId = req.user.id;
   const user = await User.findById(userId);
+  let temp_id = userId;
+  if (user.companyId) {
+    temp_id = user.companyId;
+  }
   // const publicFolders = await Folder.find({ accessType: "public" });
   // console.log(publicFolders);
   let recordQuery = "";
@@ -52,7 +56,7 @@ router.post("/getRecords", fetchuser, async (req, res) => {
           },
           user: {
             $in: await User.find({
-              companyId: userId,
+              companyId: temp_id,
             }),
           },
         },
@@ -64,7 +68,7 @@ router.post("/getRecords", fetchuser, async (req, res) => {
           },
           user: {
             $in: await User.find({
-              _id: user.companyId,
+              _id: temp_id,
             }),
           },
         },
@@ -90,7 +94,7 @@ router.post("/getRecords", fetchuser, async (req, res) => {
           },
           user: {
             $in: await User.find({
-              companyId: userId,
+              companyId: temp_id,
             }),
           },
         },
@@ -102,7 +106,7 @@ router.post("/getRecords", fetchuser, async (req, res) => {
           },
           user: {
             $in: await User.find({
-              _id: user.companyId,
+              _id: temp_id,
             }),
           },
         },
@@ -112,9 +116,36 @@ router.post("/getRecords", fetchuser, async (req, res) => {
       .populate("user", "companyId");
   } else {
     recordQuery = await Record.find({
-      user: userId,
+      status: "Failed",
+      $or: [
+        { user: userId },
+        {
+          folder: {
+            $in: await Folder.find({
+              accessType: "public",
+            }),
+          },
+          user: {
+            $in: await User.find({
+              companyId: temp_id,
+            }),
+          },
+        },
+        {
+          folder: {
+            $in: await Folder.find({
+              accessType: "public",
+            }),
+          },
+          user: {
+            $in: await User.find({
+              _id: temp_id,
+            }),
+          },
+        },
+      ],
     })
-      .populate("folder", "id folderName accessType")
+      .populate("folder", "folderName accessType")
       .populate("user", "companyId");
   }
 
