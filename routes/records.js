@@ -421,6 +421,20 @@ router.post("/webhooks", async (req, res) => {
       }
       // await findRecord.save();
       console.log("final save", "fffffffffffff");
+    } else if (req.body.data.status.code === "fatal") {
+      console.log(req.body, "fatal body");
+      const findRecord = await Record.findOne({
+        botId: req.body.data.bot_id,
+      });
+      if (findRecord) {
+        (findRecord.status = "Failed"), await findRecord.save();
+        const recordStatus = new RecordStatus({
+          user: findRecord.user,
+          recordId: findRecord._id,
+          status: "Failed",
+        });
+        await recordStatus.save();
+      }
     }
     // }, 60);
   } catch (e) {
