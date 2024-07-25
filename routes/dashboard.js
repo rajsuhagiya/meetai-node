@@ -23,16 +23,97 @@ router.get("/getDashboard", fetchuser, async (req, res) => {
       ],
     });
     const yourCalls = await Record.countDocuments({ user: user_id });
+    const teamCalls = await Record.countDocuments({
+      $or: [
+        { user: user_id },
+        {
+          user: { $in: await User.find({ companyId: user_id }) },
+        },
+        {
+          user: { $in: await User.find({ _id: user.companyId }) },
+        },
+      ],
+    });
     res.status(200).json({
       message: "",
       folderCount,
       yourCalls,
-      teamCalls: 0,
+      teamCalls,
       failedCalls: 0,
     });
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }
+});
+
+router.get("/get-tally-chart", fetchuser, async (req, res) => {
+  const userId = req.user.id;
+  const user = await User.findById(userId);
+
+  const users = await User.find({
+    $or: [{ _id: userId }, { companyId: userId }, { _id: user.companyId }],
+  }).select("_id name");
+
+  const userIds = users.map((user) => user._id);
+
+  const records = await Record.find({
+    user: { $in: userIds },
+  }).populate("user", "name");
+
+  const userRecordCountMap = {};
+  records.forEach((record) => {
+    const userName = record.user.name;
+    if (!userRecordCountMap[userName]) {
+      userRecordCountMap[userName] = 0;
+    }
+    userRecordCountMap[userName]++;
+  });
+
+  const names = Object.keys(userRecordCountMap);
+  const counts = Object.values(userRecordCountMap);
+
+  console.log("Names:", names);
+  console.log("Counts:", counts);
+
+  const data = {
+    series: [
+      {
+        data: counts,
+      },
+    ],
+    options: {
+      chart: {
+        type: "bar",
+        height: 350,
+        fontFamily: "Poppins",
+        toolbar: {
+          show: true,
+          tools: {
+            download: false,
+          },
+        },
+      },
+      plotOptions: {
+        bar: {
+          borderRadius: 4,
+          borderRadiusApplication: "end",
+          horizontal: true,
+        },
+      },
+      dataLabels: {
+        enabled: false,
+      },
+      xaxis: {
+        categories: names,
+        style: {
+          fontSize: "20px",
+          fontWeight: 600,
+        },
+      },
+      colors: ["#a72ee7"],
+    },
+  };
+  res.status(200).json({ data });
 });
 
 router.post("/createbot", fetchuser, async (req, res) => {});

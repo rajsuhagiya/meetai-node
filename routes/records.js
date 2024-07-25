@@ -33,53 +33,101 @@ router.get("/getbot", fetchuser, async (req, res) => {
   }
 });
 
-router.get("/getRecords", fetchuser, async (req, res) => {
-  console.log("---------");
+router.post("/getRecords", fetchuser, async (req, res) => {
+  const status = req.body.status;
   const userId = req.user.id;
   const user = await User.findById(userId);
   // const publicFolders = await Folder.find({ accessType: "public" });
   // console.log(publicFolders);
+  let recordQuery = "";
+  if (status == "all-calls") {
+    recordQuery = await Record.find({
+      $or: [
+        { user: userId }, // Records belonging to the logged-in user
+        {
+          folder: {
+            $in: await Folder.find({
+              accessType: "public",
+            }),
+          },
+          user: {
+            $in: await User.find({
+              companyId: userId,
+            }),
+          },
+        },
+        {
+          folder: {
+            $in: await Folder.find({
+              accessType: "public",
+            }),
+          },
+          user: {
+            $in: await User.find({
+              _id: user.companyId,
+            }),
+          },
+        },
+      ],
+    })
+      .populate("folder", "folderName accessType")
+      .populate("user", "companyId");
+  } else if (status == "your-calls") {
+    recordQuery = await Record.find({
+      user: userId,
+    })
+      .populate("folder", "folderName accessType")
+      .populate("user", "companyId");
+  } else if (status == "team-calls") {
+    recordQuery = await Record.find({
+      user: { $ne: userId },
+      $or: [
+        {
+          folder: {
+            $in: await Folder.find({
+              accessType: "public",
+            }),
+          },
+          user: {
+            $in: await User.find({
+              companyId: userId,
+            }),
+          },
+        },
+        {
+          folder: {
+            $in: await Folder.find({
+              accessType: "public",
+            }),
+          },
+          user: {
+            $in: await User.find({
+              _id: user.companyId,
+            }),
+          },
+        },
+      ],
+    })
+      .populate("folder", "folderName accessType")
+      .populate("user", "companyId");
+  } else {
+    recordQuery = await Record.find({
+      user: userId,
+    })
+      .populate("folder", "id folderName accessType")
+      .populate("user", "companyId");
+  }
 
-  const recordQuery = await Record.find({
-    $or: [
-      { user: userId }, // Records belonging to the logged-in user
-      {
-        folder: {
-          $in: await Folder.find({
-            accessType: "public",
-          }),
-        },
-        user: {
-          $in: await User.find({
-            companyId: userId,
-          }),
-        },
-      },
-      {
-        folder: {
-          $in: await Folder.find({
-            accessType: "public",
-          }),
-        },
-        user: {
-          $in: await User.find({
-            _id: user.companyId,
-          }),
-        },
-      },
-    ],
-  })
-    .populate("folder", "folderName accessType")
-    .populate("user", "companyId");
   const records = recordQuery.map((record) => ({
     id: record._id,
+    folderId: record.folder._id,
     name: record.meetingName,
     type: record.folder.accessType,
     record: record.videoUrl,
     status: record.status,
     platform: record.platform,
     date: format(record.joinAt, "MM-dd-yyyy"),
-    time: format(record.joinAt, "HH:mm:ss"),
+    time: format(record.joinAt, "h:mm a"),
     folder: record.folder.folderName,
 
     action: record.user._id == userId ? true : false,
@@ -207,6 +255,20 @@ router.delete("/deleteRecord/:id", fetchuser, async (req, res) => {
     }
     record = await Record.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: "Record Deleted Successfully", record });
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+router.put("/share-meeting", fetchuser, async (req, res) => {
+  try {
+    const { recordId, folderId } = req.body;
+    const findRecord = await Record.findById(recordId);
+    if (findRecord) {
+      findRecord.folder = folderId;
+      await findRecord.save();
+    }
+    res.status(200).json({ message: "Record Shared Successfully" });
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }
