@@ -50,9 +50,16 @@ router.get("/get-tally-chart", fetchuser, async (req, res) => {
   const userId = req.user.id;
   const user = await User.findById(userId);
 
+  let temp_id = userId;
+  if (user.companyId) {
+    temp_id = user.companyId;
+  }
+
   const users = await User.find({
-    $or: [{ _id: userId }, { companyId: userId }, { _id: user.companyId }],
+    $or: [{ _id: temp_id }, { companyId: temp_id }],
   }).select("_id name");
+
+  console.log(users);
 
   const userIds = users.map((user) => user._id);
 
