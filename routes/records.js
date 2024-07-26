@@ -455,7 +455,7 @@ router.post("/webhooks", async (req, res) => {
             console.log(json, "get_tanscript");
             let transcript = "";
             if (json.length > 0) {
-              text = json
+              transcript = json
                 .map((entry) => {
                   const speakerText = entry.words
                     .map((word) => word.text)
@@ -464,7 +464,8 @@ router.post("/webhooks", async (req, res) => {
                 })
                 .join("\n");
               findRecord.transcript = transcript;
-              if (transcript != null) {
+              if (transcript) {
+                console.log("added a trans");
                 const response = await openai.chat.completions.create({
                   messages: [
                     {
