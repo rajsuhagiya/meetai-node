@@ -1,6 +1,13 @@
 const connectToMongo = require("./db");
 const express = require("express");
 var cors = require("cors");
+const { LocalStorage } = require("node-localstorage");
+const localStorage = new LocalStorage("./scratch");
+
+localStorage.setItem(
+  "myKey",
+  "sk-proj-uxkGsuu7bvvXDonXSqQXT3BlbkFJpIRsgstRZgG5tTDxN0Q5"
+);
 
 connectToMongo();
 
