@@ -472,25 +472,25 @@ router.post("/webhooks", async (req, res) => {
                 })
                 .join("\n");
               findRecord.transcript = transcript;
-              if (transcript) {
-                console.log("added a trans");
-                const response = await openai.chat.completions.create({
-                  messages: [
-                    {
-                      role: "user",
-                      content: `${transcript} - Please provide a concise summary of this transcript.`,
-                      max_tokens: 100,
-                    },
-                  ],
-                  model: "gpt-4o-mini",
-                });
-                const des = response.choices[0].message;
-                if (response.choices && response.choices.length > 0) {
-                  const summary = response.choices[0].message.content;
-                  findRecord.summary = summary;
-                  console.log("summary Saved by gpt-4");
-                }
-              }
+              // if (transcript) {
+              //   console.log("added a trans");
+              //   const response = await openai.chat.completions.create({
+              //     messages: [
+              //       {
+              //         role: "user",
+              //         content: `${transcript} - Please provide a concise summary of this transcript.`,
+              //         max_tokens: 100,
+              //       },
+              //     ],
+              //     model: "gpt-4o-mini",
+              //   });
+              //   const des = response.choices[0].message;
+              //   if (response.choices && response.choices.length > 0) {
+              //     const summary = response.choices[0].message.content;
+              //     findRecord.summary = summary;
+              //     console.log("summary Saved by gpt-4");
+              //   }
+              // }
               console.log("Transcipt Saved");
             }
             await findRecord.save();
