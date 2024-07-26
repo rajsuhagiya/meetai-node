@@ -25,8 +25,7 @@ const APIKEY = "f3da1c8372f7d6cb4d1b8f3c4f3ace179ad643e2";
 // const APIKEY = "29a16e9135f397c745c0aec150651378fd1e4632";
 
 const openai = new OpenAI({
-  // apiKey: process.env.OPENAI_API_KEY,
-  apiKey: "sk-proj-REhKmHwA0uimw0F8Lc1IT3BlbkFJvScQ0sq2309gfDqM1WGC",
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 router.get("/chatgpt", fetchuser, async (req, res) => {
@@ -404,12 +403,25 @@ router.post("/webhooks", async (req, res) => {
                 findRecord.duration = formattedDuration;
               }
               await findRecord.save();
-              const recordCompleted = new RecordStatus({
+              // const recordCompleted = new RecordStatus({
+              //   user: findRecord.user,
+              //   recordId: findRecord._id,
+              //   status: "Completed",
+              // });
+              // await recordCompleted.save();
+              const recordCompleted = await RecordStatus.findOne({
                 user: findRecord.user,
                 recordId: findRecord._id,
                 status: "Completed",
               });
-              await recordCompleted.save();
+              if (!recordCompleted) {
+                const recordStatus = new RecordStatus({
+                  user: findRecord.user,
+                  recordId: findRecord._id,
+                  status: "Completed",
+                });
+                await recordStatus.save();
+              }
               console.log("Record Saved ---");
               cloudinary.config({
                 cloud_name: "dbthjxcj7",
@@ -470,7 +482,7 @@ router.post("/webhooks", async (req, res) => {
                       max_tokens: 100,
                     },
                   ],
-                  model: "gpt-4o",
+                  model: "gpt-4o-mini",
                 });
                 const des = response.choices[0].message;
                 if (response.choices && response.choices.length > 0) {
