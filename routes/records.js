@@ -25,28 +25,23 @@ const APIKEY = "f3da1c8372f7d6cb4d1b8f3c4f3ace179ad643e2";
 // const APIKEY = "29a16e9135f397c745c0aec150651378fd1e4632";
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  // apiKey: process.env.OPENAI_API_KEY,
+  apiKey: "sk-proj-REhKmHwA0uimw0F8Lc1IT3BlbkFJvScQ0sq2309gfDqM1WGC",
 });
 
 router.get("/chatgpt", fetchuser, async (req, res) => {
-  try {
-    const response = await openai.chat.completions.create({
-      messages: [
-        {
-          role: "user",
-          content:
-            "RAJ SUHAGIYA: Yeah, that's that's great.\nRAJ SUHAGIYA: But does this really happen?\nRAJ SUHAGIYA: No. No, that would never happen at a\nRAJ SUHAGIYA: consulate.\nRAJ SUHAGIYA: What a lucky guy.\nRAJ SUHAGIYA: Right.\nRAJ SUHAGIYA: He applied for a tourist visa and now\nRAJ SUHAGIYA: Okay.\nRAJ SUHAGIYA: he's getting a resident Visa.\nRAJ SUHAGIYA: Well we can we can dream that this\nRAJ SUHAGIYA: words in language takeaway today\nRAJ SUHAGIYA: Yeah, exactly.\nRAJ SUHAGIYA: language takeaway.\nRAJ SUHAGIYA: Alright, let's take a look at the\nRAJ SUHAGIYA: might happen for us. - Please provide a concise summary of this transcript.",
-          max_tokens: 100,
-        },
-      ],
-      model: "gpt-4o",
-    });
-    if (response.choices && response.choices.length > 0) {
-      const des = response.choices[0].message.content;
-      res.status(200).json({ des });
-    }
-  } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
+  const response = await openai.chat.completions.create({
+    messages: [
+      {
+        role: "user",
+        content: "how are you",
+      },
+    ],
+    model: "gpt-4o-mini",
+  });
+  if (response.choices && response.choices.length > 0) {
+    const summary = response.choices[0].message.content;
+    res.status(200).json({ summary });
   }
 });
 

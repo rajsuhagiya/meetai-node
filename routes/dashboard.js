@@ -71,12 +71,18 @@ router.get("/getDashboard", fetchuser, async (req, res) => {
         },
       ],
     });
+    const allCalls = yourCalls + teamCalls;
+    const team = await User.countDocuments({
+      $or: [{ user: temp_id }, { companyId: temp_id }],
+    });
     res.status(200).json({
       message: "",
       folderCount,
+      allCalls,
       yourCalls,
       teamCalls,
       failedCalls,
+      team,
     });
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
