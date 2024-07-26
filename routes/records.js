@@ -24,25 +24,25 @@ const Recall = "us-west-2.recall.ai";
 const APIKEY = "f3da1c8372f7d6cb4d1b8f3c4f3ace179ad643e2";
 // const APIKEY = "29a16e9135f397c745c0aec150651378fd1e4632";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// const openai = new OpenAI({
+//   apiKey: process.env.OPENAI_API_KEY,
+// });
 
-router.get("/chatgpt", fetchuser, async (req, res) => {
-  const response = await openai.chat.completions.create({
-    messages: [
-      {
-        role: "user",
-        content: "how are you",
-      },
-    ],
-    model: "gpt-4o-mini",
-  });
-  if (response.choices && response.choices.length > 0) {
-    const summary = response.choices[0].message.content;
-    res.status(200).json({ summary });
-  }
-});
+// router.get("/chatgpt", fetchuser, async (req, res) => {
+//   const response = await openai.chat.completions.create({
+//     messages: [
+//       {
+//         role: "user",
+//         content: "how are you",
+//       },
+//     ],
+//     model: "gpt-4o-mini",
+//   });
+//   if (response.choices && response.choices.length > 0) {
+//     const summary = response.choices[0].message.content;
+//     res.status(200).json({ summary });
+//   }
+// });
 
 router.get("/getbot", fetchuser, async (req, res) => {
   try {
