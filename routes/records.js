@@ -25,7 +25,7 @@ const APIKEY = "f3da1c8372f7d6cb4d1b8f3c4f3ace179ad643e2";
 // const APIKEY = "29a16e9135f397c745c0aec150651378fd1e4632";
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.MY_SECRET_KEY,
 });
 
 router.get("/chatgpt", fetchuser, async (req, res) => {
