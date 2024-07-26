@@ -16,6 +16,7 @@ const https = require("https");
 const { format } = require("date-fns");
 const cloudinary = require("cloudinary").v2;
 const OpenAI = require("openai");
+require("dotenv").config();
 
 const { type } = require("os");
 
@@ -23,9 +24,9 @@ const Recall = "us-west-2.recall.ai";
 const APIKEY = "f3da1c8372f7d6cb4d1b8f3c4f3ace179ad643e2";
 // const APIKEY = "29a16e9135f397c745c0aec150651378fd1e4632";
 
-const openai = new OpenAI({
-  apiKey: "sk-proj-REhKmHwA0uimw0F8Lc1IT3BlbkFJvScQ0sq2309gfDqM1WGC",
-});
+// const openai = new OpenAI({
+//   apiKey: process.env.OPENAI_API_KEY,
+// });
 
 router.get("/chatgpt", fetchuser, async (req, res) => {
   try {
