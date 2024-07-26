@@ -3,6 +3,7 @@ const router = express.Router();
 const { body, validationResult } = require("express-validator");
 const Folder = require("../models/Folder");
 const User = require("../models/User");
+const Notes = require("../models/Notes");
 const Record = require("../models/Record");
 const RecordStatus = require("../models/RecordStatus");
 const fetchuser = require("../middleware/fetchuser");
@@ -60,14 +61,44 @@ router.get("/get-record-details/:id", fetchuser, async (req, res) => {
     summary: record.summary,
     recordStatuses: recordStatuses,
   };
+  const notesQuery = await Notes.find({ recordId: record._id })
+    .sort({
+      createdAt: -1,
+    })
+    .populate("user", "name");
+
+  const notes = notesQuery.map((note) => ({
+    recordId: note.recordId,
+    notes: note.notes,
+    accessType: note.accessType,
+    date: format(note.createdAt, "do MMMM yyyy"),
+    name: note.user.name,
+  }));
+
+  console.log(notes);
   res.status(200).json({
     success: "Record Details Fetched Successfully",
     status: 200,
     recordDetails,
+    notes,
   });
   // } catch (error) {
   //   res.status(500).json({ error: "Internal Server Error" });
   // }
+});
+
+router.post("/add-notes", fetchuser, async (req, res) => {
+  const { recordId, notes, accessType } = req.body;
+  userId = req.user.id;
+  const note = await Notes.create({
+    recordId: recordId,
+    user: userId,
+    notes: notes,
+    accessType: accessType,
+  });
+  res
+    .status(200)
+    .json({ success: "Notes Added Successfully", status: 200, note });
 });
 
 module.exports = router;
