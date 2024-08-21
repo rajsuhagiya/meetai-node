@@ -21,7 +21,8 @@ require("dotenv").config();
 const { type } = require("os");
 
 const Recall = "us-west-2.recall.ai";
-const APIKEY = "f3da1c8372f7d6cb4d1b8f3c4f3ace179ad643e2";
+// myapiKey
+// const APIKEY = "f3da1c8372f7d6cb4d1b8f3c4f3ace179ad643e2";
 // const APIKEY = "29a16e9135f397c745c0aec150651378fd1e4632";
 
 console.log(process.env.GPT);
